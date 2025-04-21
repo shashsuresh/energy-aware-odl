@@ -30,7 +30,7 @@ static N_BIAS_TO_UPDATE: usize = 22;
 static LAYER_ITER_MAX: usize = 42;
 
 fn main() -> Result<(), Error> {
-    let model = Model::from_json("misc/mcunet-5fps_all.json")?;
+    let model = Model::from_json("analysis/misc/mcunet-5fps_all.json")?;
 
     let mut candidates = Vec::new();
 
