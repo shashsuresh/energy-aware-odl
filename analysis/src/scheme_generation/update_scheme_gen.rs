@@ -18,7 +18,7 @@ pub enum Constraints {
 /// All scheme generators must implement this trait
 pub trait SchemeGenerator<T> {
     /// A method to return the value that the provided `OptimizationParam` instance represents
-    fn get_opt_param(&self, instance: &T) -> usize;
+    fn get_opt_param(&self, instance: &T) -> f64;
     /// A method to return the value that the provided `Constraints` instance represents
     fn get_constraint(&self, instance: &T) -> (usize, usize);
     /// A method to generate schemes, based on the algorithm the optimization scheme runs

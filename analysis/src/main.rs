@@ -52,7 +52,7 @@ fn main() -> Result<(), Error> {
 
     let mut scheme_gen = GreedyGenerator::new(
         update_scheme_gen::Constraints::Memory(63),
-        update_scheme_gen::OptimizationParam::Accuracy,
+        update_scheme_gen::OptimizationParam::Efficiency,
     );
     let scheme = scheme_gen.generate_schemes(candidates);
 
