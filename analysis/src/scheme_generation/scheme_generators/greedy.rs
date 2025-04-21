@@ -47,7 +47,11 @@ impl SchemeGenerator<UpdateSchemeCandidate> for GreedyGenerator {
         all_options: Vec<UpdateSchemeCandidate>,
     ) -> Vec<UpdateSchemeCandidate> {
         let mut good_solutions = self.eliminate_unreasonable(all_options);
-        good_solutions.sort_by(|x, y| (self.get_opt_param(y)).partial_cmp(&self.get_opt_param(x)).unwrap());
+        good_solutions.sort_by(|x, y| {
+            (self.get_opt_param(y))
+                .partial_cmp(&self.get_opt_param(x))
+                .unwrap()
+        });
         let mut scheme: Vec<UpdateSchemeCandidate> = Vec::new();
 
         for candidate in good_solutions {
@@ -65,7 +69,9 @@ impl SchemeGenerator<UpdateSchemeCandidate> for GreedyGenerator {
     fn get_opt_param(&self, instance: &UpdateSchemeCandidate) -> f64 {
         match self.opt_param {
             OptimizationParam::Accuracy => instance.stats.delta_acc as f64, // We can guarantee this as all negative delta acc. candidates have been removed!
-            OptimizationParam::Efficiency => instance.stats.delta_acc as f64 / instance.stats.bp_ops as f64,
+            OptimizationParam::Efficiency => {
+                instance.stats.delta_acc as f64 / instance.stats.bp_ops as f64
+            }
         }
     }
 
