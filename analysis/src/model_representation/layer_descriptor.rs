@@ -168,6 +168,10 @@ impl LayerDescriptor {
         }
     }
 
+    /// Returns the delta accuracy if the subset of channels `ratio_divider`
+    /// corresponds to are updated. 
+    /// If `ratio_divider` is none delta accuracy of updating the bias
+    /// only is returned
     pub fn get_delta_acc(&self, ratio_divider: Option<ChannelRatio>) -> isize {
         match self {
             LayerDescriptor::GroupConv(convolution_parameters)
