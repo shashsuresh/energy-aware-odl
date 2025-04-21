@@ -26,5 +26,14 @@ jobs:
       run: cargo clippy
     - name: Build
       run: cargo build --verbose
+    - name: Cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
     #- name: Run tests
       #run: cargo test --verbose

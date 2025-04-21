@@ -3,20 +3,27 @@ use crate::scheme_generation::{
     update_scheme_gen::{Constraints, OptimizationParam, SchemeGenerator},
 };
 
-pub struct GreedyMaxAccGenerator {
-    constraints: Constraints,
-    opt_param: OptimizationParam,
+/// Structure to represent a greedy update scheme generator
+/// which will use the greedy algorithm to derive an update
+/// scheme, which maximizes the provided `opt_param` while
+/// ensuring the `constraint` provided is met.
+pub struct GreedyGenerator {
+    constraints: Constraints,     // Constraint that the scheme must meet
+    opt_param: OptimizationParam, // Parameter the greedy algorithm should try to maximize
 }
-impl GreedyMaxAccGenerator {
-    pub fn new(constraint: Constraints, opt_param: OptimizationParam) -> Self {
-        GreedyMaxAccGenerator {
-            constraints: constraint,
+impl GreedyGenerator {
+    /// Create a new greedy instance
+    /// `constraint` must be of the type `Constraints`
+    /// `opt_param` must be of the type `OptimizationParam`
+    pub fn new(constraints: Constraints, opt_param: OptimizationParam) -> Self {
+        GreedyGenerator {
+            constraints,
             opt_param,
         }
     }
 }
 
-impl SchemeGenerator<UpdateSchemeCandidate> for GreedyMaxAccGenerator {
+impl SchemeGenerator<UpdateSchemeCandidate> for GreedyGenerator {
     fn eliminate_unreasonable(
         &self,
         all_options: Vec<UpdateSchemeCandidate>,
@@ -41,7 +48,6 @@ impl SchemeGenerator<UpdateSchemeCandidate> for GreedyMaxAccGenerator {
     ) -> Vec<UpdateSchemeCandidate> {
         let mut good_solutions = self.eliminate_unreasonable(all_options);
         good_solutions.sort_by_key(|y| std::cmp::Reverse(self.get_opt_param(y)));
-        // good_solutions.sort_by(|x, y| (self.get_opt_param(y)).cmp(&self.get_opt_param(x)));
         let mut scheme: Vec<UpdateSchemeCandidate> = Vec::new();
 
         for candidate in good_solutions {
@@ -58,15 +64,15 @@ impl SchemeGenerator<UpdateSchemeCandidate> for GreedyMaxAccGenerator {
 
     fn get_opt_param(&self, instance: &UpdateSchemeCandidate) -> usize {
         match self.opt_param {
-            OptimizationParam::Accuracy => instance.stats.delta_acc as usize, // We can guarantee this as all negative ones have been killed!
+            OptimizationParam::Accuracy => instance.stats.delta_acc as usize, // We can guarantee this as all negative delta acc. candidates have been removed!
             OptimizationParam::Efficiency => 0,
         }
     }
 
     fn get_constraint(&self, instance: &UpdateSchemeCandidate) -> (usize, usize) {
         match self.constraints {
-            Constraints::Memory(val) => (
-                val,
+            Constraints::Memory(available) => (
+                available,
                 (instance.stats.bp_memory as f64 / 1024. / 8.0).round() as usize,
             ),
             Constraints::MACs(_) => (0, 0),

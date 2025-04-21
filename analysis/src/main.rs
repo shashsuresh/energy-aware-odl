@@ -4,7 +4,7 @@ mod scheme_generation;
 use channel_ratio::ChannelRatio;
 use parser::{channel_ratio, layer, layer_descriptor, model::Model};
 use scheme_generation::{
-    scheme_generators::greedy_max_acc_gen::GreedyMaxAccGenerator,
+    scheme_generators::greedy::GreedyGenerator,
     update_scheme_candidate, update_scheme_fitness,
     update_scheme_gen::{self, SchemeGenerator},
 };
@@ -50,7 +50,7 @@ fn main() -> Result<(), Error> {
         }
     }
 
-    let mut scheme_gen = GreedyMaxAccGenerator::new(
+    let mut scheme_gen = GreedyGenerator::new(
         update_scheme_gen::Constraints::Memory(63),
         update_scheme_gen::OptimizationParam::Accuracy,
     );
