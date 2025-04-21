@@ -2,7 +2,9 @@ mod parser;
 mod scheme_generation;
 
 use channel_ratio::ChannelRatio;
-use parser::{channel_ratio, layer, layer_descriptor, model::Model};
+use parser::{
+    channel_ratio, layer, layer_descriptor, model::Model, sparse_update_config::SparseUpdateConfig,
+};
 use scheme_generation::{
     scheme_generators::greedy::GreedyGenerator,
     update_scheme_candidate, update_scheme_fitness,
@@ -13,21 +15,6 @@ use update_scheme_candidate::UpdateSchemeCandidate;
 use update_scheme_fitness::UpdateSchemeFitness;
 
 use evolutionary::prelude::*;
-
-// For now we define our update config here
-static LAYER_IDX_TO_UPDATE: [(usize, ChannelRatio); 6] = [
-    (21, ChannelRatio::All),
-    (24, ChannelRatio::All),
-    (27, ChannelRatio::All),
-    (30, ChannelRatio::All),
-    (36, ChannelRatio::OneEighth),
-    (39, ChannelRatio::Quarter),
-];
-// static LAYER_IDX_TO_UPDATE: [(usize, ChannelRatio); 0] = [];
-static N_BIAS_TO_UPDATE: usize = 22;
-
-//Where to stop layer iterations - depends on Model
-static LAYER_ITER_MAX: usize = 42;
 
 fn main() -> Result<(), Error> {
     let model = Model::from_json("analysis/misc/mcunet-5fps_all.json")?;
@@ -51,18 +38,16 @@ fn main() -> Result<(), Error> {
     }
 
     let mut scheme_gen = GreedyGenerator::new(
-        update_scheme_gen::Constraints::Memory(63),
+        update_scheme_gen::Constraints::Memory(16),
         update_scheme_gen::OptimizationParam::Efficiency,
     );
     let scheme = scheme_gen.generate_schemes(candidates);
 
-    println!("{:?}", scheme);
-
-    let update_cost = model.get_sparse_update_statistics(
-        (LAYER_IDX_TO_UPDATE.to_vec(), N_BIAS_TO_UPDATE),
-        LAYER_ITER_MAX,
-    );
-    update_cost.display_total_stats();
+    let scheme_config = SparseUpdateConfig::from_scheme(scheme);
+    scheme_config.display_scheme();
+    model
+        .get_sparse_update_statistics(scheme_config, 42)
+        .display_total_stats();
 
     Ok(())
 }

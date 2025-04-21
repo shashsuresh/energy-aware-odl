@@ -6,11 +6,9 @@ use std::{
 use serde_json::{Map, Value, from_str, from_value};
 
 use super::{
-    channel_ratio::ChannelRatio, layer::Layer, layer_descriptor::LayerDescriptor,
+    layer::Layer, layer_descriptor::LayerDescriptor, sparse_update_config::SparseUpdateConfig,
     sparse_update_stats::SparseUpdateStats,
 };
-
-type SparseUpdateConfig = (Vec<(usize, ChannelRatio)>, usize);
 
 /// A CNN Model represented as a collection of layers
 pub struct Model {
@@ -94,11 +92,12 @@ impl Model {
                 let layer_id_parsed: usize = layer_id.parse::<usize>().unwrap() - 1;
 
                 //First look for the layer in the config, if yes incude weights and biases
-                if let Some(pair) = config.0.iter().find(|pair| pair.0 == layer_id_parsed) {
+                if let Some(pair) = config.weights.iter().find(|pair| pair.0 == layer_id_parsed) {
                     activation_memory.push(layer.get_activation_memory(Some(pair.1)));
                     weights_memory.push(layer.get_weight_memory(Some(pair.1)));
                     ops.push(layer.get_computation_cost(Some(pair.1)));
-                } else if (layer_iter_max - config.1..layer_iter_max).contains(&layer_id_parsed) {
+                } else if (layer_iter_max - config.bias..layer_iter_max).contains(&layer_id_parsed)
+                {
                     activation_memory.push(layer.get_activation_memory(None));
                     weights_memory.push(layer.get_weight_memory(None));
                     ops.push(layer.get_computation_cost(None));

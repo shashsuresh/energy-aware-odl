@@ -28,4 +28,13 @@ impl ChannelRatio {
             ChannelRatio::OneEighth => layer_desc.eighth_channels,
         }
     }
+
+    pub fn get_value(&self) -> f64 {
+        match self {
+            ChannelRatio::All => 1.,
+            ChannelRatio::Half => 0.5,
+            ChannelRatio::Quarter => 0.25,
+            ChannelRatio::OneEighth => 0.125,
+        }
+    }
 }
