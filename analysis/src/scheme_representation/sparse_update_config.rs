@@ -1,6 +1,7 @@
-use crate::scheme_generation::update_scheme_candidate::UpdateSchemeCandidate;
-
-use super::channel_ratio::ChannelRatio;
+use crate::{
+    model_representation::channel_ratio::ChannelRatio,
+    scheme_generation::update_scheme_candidate::UpdateSchemeCandidate,
+};
 
 pub struct SparseUpdateConfig {
     pub weights: Vec<(usize, ChannelRatio)>,

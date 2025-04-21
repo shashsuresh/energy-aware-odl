@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{channel_ratio::ChannelRatio, layer::Layer};
+use crate::{
+    model_representation::channel_ratio::ChannelRatio, model_representation::layer::Layer,
+};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct UpdateSchemeCandidate {

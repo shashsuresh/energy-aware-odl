@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::parser::params::convolution_params::ConvolutionParameters;
+use super::params::convolution_params::ConvolutionParameters;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Serialize, Deserialize)]
 /// Channel ratios we support for sparse update configs
@@ -29,6 +29,8 @@ impl ChannelRatio {
         }
     }
 
+    /// Returns the value corresponding to each enum variant
+    /// can be used for evaluation or for printing
     pub fn get_value(&self) -> f64 {
         match self {
             ChannelRatio::All => 1.,

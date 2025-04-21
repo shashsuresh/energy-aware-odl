@@ -1,15 +1,14 @@
-mod parser;
+mod model_representation;
 mod scheme_generation;
+mod scheme_representation;
 
-use channel_ratio::ChannelRatio;
-use parser::{
-    channel_ratio, layer, layer_descriptor, model::Model, sparse_update_config::SparseUpdateConfig,
-};
+use model_representation::{channel_ratio::ChannelRatio, model::Model};
 use scheme_generation::{
     scheme_generators::greedy::GreedyGenerator,
     update_scheme_candidate, update_scheme_fitness,
     update_scheme_gen::{self, SchemeGenerator},
 };
+use scheme_representation::sparse_update_config::SparseUpdateConfig;
 use std::io::Error;
 use update_scheme_candidate::UpdateSchemeCandidate;
 use update_scheme_fitness::UpdateSchemeFitness;

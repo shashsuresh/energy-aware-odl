@@ -5,10 +5,11 @@ use std::{
 
 use serde_json::{Map, Value, from_str, from_value};
 
-use super::{
-    layer::Layer, layer_descriptor::LayerDescriptor, sparse_update_config::SparseUpdateConfig,
-    sparse_update_stats::SparseUpdateStats,
+use crate::scheme_representation::{
+    sparse_update_config::SparseUpdateConfig, sparse_update_stats::SparseUpdateStats,
 };
+
+use super::{layer::Layer, layer_descriptor::LayerDescriptor};
 
 /// A CNN Model represented as a collection of layers
 pub struct Model {

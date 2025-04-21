@@ -3,5 +3,3 @@ pub mod layer;
 pub mod layer_descriptor;
 pub mod model;
 pub mod params;
-pub mod sparse_update_config;
-pub mod sparse_update_stats;

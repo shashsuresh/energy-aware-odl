@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    ChannelRatio,
-    parser::params::{
+use super::{
+    channel_ratio::ChannelRatio,
+    params::{
         convolution_params::ConvolutionParameters, fully_connected_params::FullyConnectedParams,
     },
 };
