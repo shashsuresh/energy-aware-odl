@@ -1,5 +1,5 @@
 [package]
-name = "energy-model"
+name = "analysis"
 version = "0.1.0"
 edition = "2024"
 

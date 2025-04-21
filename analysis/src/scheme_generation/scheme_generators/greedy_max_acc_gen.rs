@@ -40,7 +40,8 @@ impl SchemeGenerator<UpdateSchemeCandidate> for GreedyMaxAccGenerator {
         all_options: Vec<UpdateSchemeCandidate>,
     ) -> Vec<UpdateSchemeCandidate> {
         let mut good_solutions = self.eliminate_unreasonable(all_options);
-        good_solutions.sort_by(|x, y| (self.get_opt_param(y)).cmp(&self.get_opt_param(x)));
+        good_solutions.sort_by_key(|y| std::cmp::Reverse(self.get_opt_param(y)));
+        // good_solutions.sort_by(|x, y| (self.get_opt_param(y)).cmp(&self.get_opt_param(x)));
         let mut scheme: Vec<UpdateSchemeCandidate> = Vec::new();
 
         for candidate in good_solutions {

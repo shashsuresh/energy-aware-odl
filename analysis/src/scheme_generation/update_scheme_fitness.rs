@@ -1,5 +1,4 @@
 use evolutionary::{Fitness, Individual, prelude::Bin};
-use std::f64::MIN;
 
 use crate::scheme_generation::update_scheme_candidate::UpdateSchemeCandidate;
 
@@ -23,7 +22,7 @@ impl Fitness<Bin> for UpdateSchemeFitness {
             })
             .sum();
         if memory_bp as f64 / 1024.0 / 8.0 > 50. {
-            MIN
+            f64::MIN
         } else {
             memory_bp as f64 / 1024.0 / 8.0
         }

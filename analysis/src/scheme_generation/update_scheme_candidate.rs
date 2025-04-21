@@ -37,7 +37,7 @@ pub struct RatioStats {
 impl RatioStats {
     pub fn new(layer: &Layer, channel_ratio: Option<ChannelRatio>) -> Self {
         RatioStats {
-            delta_acc: layer.layer_info.get_delta_acc(channel_ratio) as isize,
+            delta_acc: layer.layer_info.get_delta_acc(channel_ratio),
             bp_ops: layer.get_computation_cost(channel_ratio),
             bp_memory: layer.get_activation_memory(channel_ratio)
                 + layer.get_weight_memory(channel_ratio),

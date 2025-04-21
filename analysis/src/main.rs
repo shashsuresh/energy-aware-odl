@@ -30,7 +30,7 @@ static N_BIAS_TO_UPDATE: usize = 22;
 static LAYER_ITER_MAX: usize = 42;
 
 fn main() -> Result<(), Error> {
-    let model = Model::from_json("../misc/mcunet-5fps_all.json")?;
+    let model = Model::from_json("misc/mcunet-5fps_all.json")?;
 
     let mut candidates = Vec::new();
 
@@ -68,7 +68,7 @@ fn main() -> Result<(), Error> {
 }
 
 #[allow(unused)]
-fn run_evolutionary_search(candidates: Vec<UpdateSchemeCandidate>) -> () {
+fn run_evolutionary_search(candidates: Vec<UpdateSchemeCandidate>) {
     let mut evolution = EvolutionBuilder::new(candidates.len() as u32, 5, GeneCod::Bin, ())
         .with_fitness(UpdateSchemeFitness { candidates })
         .with_selection(TournamentSelection::default())
