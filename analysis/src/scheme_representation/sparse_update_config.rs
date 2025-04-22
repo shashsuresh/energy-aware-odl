@@ -17,7 +17,10 @@ impl SparseUpdateConfig {
         for layer in scheme {
             weights.push((layer.id, layer.ratio));
         }
-        SparseUpdateConfig { weights, bias: k_biases }
+        SparseUpdateConfig {
+            weights,
+            bias: k_biases,
+        }
     }
 
     /// Display the scheme in a reader friendly format
