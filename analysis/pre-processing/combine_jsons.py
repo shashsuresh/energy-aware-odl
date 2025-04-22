@@ -6,21 +6,21 @@ for analysis
 import json
 import csv
 
-with open("json_base/mcunet-5fps_all.json", 'r') as file:
+with open("analysis/pre-processing/json_base/mcunet-5fps_all.json", 'r') as file:
     mcunet_all = json.load(file)
 
-with open("json_base/mcunet-5fps_half.json", 'r') as file:
+with open("analysis/pre-processing/json_base/mcunet-5fps_half.json", 'r') as file:
     mcunet_half = json.load(file)
 
-with open("json_base/mcunet-5fps_quarter.json", 'r') as file:
+with open("analysis/pre-processing/json_base/mcunet-5fps_quarter.json", 'r') as file:
     mcunet_quarter = json.load(file)
 
-with open("json_base/mcunet-5fps_eighth.json", 'r') as file:
+with open("analysis/pre-processing/json_base/mcunet-5fps_eighth.json", 'r') as file:
     mcunet_eighth = json.load(file)
 
 delta_accs_data = []
 
-with open("flowers_layer_contribution.csv", 'r') as file:
+with open("analysis/pre-processing/analysis_data/flowers_layer_contribution.csv", 'r') as file:
     reader = csv.DictReader(file)
     for line in reader:
         delta_accs_data.append(line)
@@ -45,5 +45,5 @@ for i in range(1,43):
         elif  str(i-1)+"_quarter" == delta_acc['id']:
             mcunet_all['conv'+str(i)]['quarter_acc_x100'] = int(float(delta_acc['delta acc']) * 100)
 
-with open("mcunet-5fps_all.json", 'w') as file:
+with open("analysis/model_jsons/mcunet-5fps_all.json", 'w') as file:
     json.dump(mcunet_all, file)
