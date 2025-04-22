@@ -38,14 +38,14 @@ fn main() -> Result<(), Error> {
     }
     // Create a GreedyGenerator instance
     let mut scheme_gen = GreedyGenerator::new(
-        update_scheme_gen::Constraints::Memory(16),
+        update_scheme_gen::Constraints::Memory(77),
         update_scheme_gen::OptimizationParam::Efficiency,
     );
     // Generate the best update scheme for the given constraints
     let scheme = scheme_gen.generate_schemes(candidates);
 
     // Get the training statistics for the scheme
-    let scheme_config = SparseUpdateConfig::from_scheme(scheme);
+    let scheme_config = SparseUpdateConfig::from_scheme(scheme, 22);
     scheme_config.display_scheme();
     model
         .get_sparse_update_statistics(scheme_config, 42)

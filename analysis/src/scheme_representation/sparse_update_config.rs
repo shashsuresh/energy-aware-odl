@@ -12,12 +12,12 @@ pub struct SparseUpdateConfig {
 impl SparseUpdateConfig {
     /// Creates a new sparse update config from an update scheme (`Vec<UpdateSchemeCandidate>`)
     /// Primarily to switch from an update scheme to something the analysis framework can use
-    pub fn from_scheme(scheme: Vec<UpdateSchemeCandidate>) -> Self {
+    pub fn from_scheme(scheme: Vec<UpdateSchemeCandidate>, k_biases: usize) -> Self {
         let mut weights = Vec::new();
         for layer in scheme {
             weights.push((layer.id, layer.ratio));
         }
-        SparseUpdateConfig { weights, bias: 22 }
+        SparseUpdateConfig { weights, bias: k_biases }
     }
 
     /// Display the scheme in a reader friendly format
