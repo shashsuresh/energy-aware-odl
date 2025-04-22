@@ -9,9 +9,9 @@ use super::params::convolution_params::ConvolutionParameters;
 /// Refer to MIT's `tiny-training/algorithm` for more information
 /// on weight selection
 pub enum ChannelRatio {
-    All = 1, // All channels (1)
-    Half = 2, // Half the channels (0.5)
-    Quarter = 4, // Quarter of the channels (0.25)
+    All = 1,       // All channels (1)
+    Half = 2,      // Half the channels (0.5)
+    Quarter = 4,   // Quarter of the channels (0.25)
     OneEighth = 8, // One Eighth of the channels (0.125)
 }
 
