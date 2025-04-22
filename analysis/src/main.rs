@@ -16,6 +16,7 @@ use update_scheme_fitness::UpdateSchemeFitness;
 use evolutionary::prelude::*;
 
 fn main() -> Result<(), Error> {
+    // Create a Model instance from the json generated when running a simulation of the on device training
     let model = Model::from_json("analysis/misc/mcunet-5fps_all.json")?;
 
     let mut candidates = Vec::new();
@@ -35,13 +36,15 @@ fn main() -> Result<(), Error> {
             candidates.push(tmp_layer);
         }
     }
-
+    // Create a GreedyGenerator instance
     let mut scheme_gen = GreedyGenerator::new(
         update_scheme_gen::Constraints::Memory(16),
         update_scheme_gen::OptimizationParam::Efficiency,
     );
+    // Generate the best update scheme for the given constraints
     let scheme = scheme_gen.generate_schemes(candidates);
 
+    // Get the training statistics for the scheme
     let scheme_config = SparseUpdateConfig::from_scheme(scheme);
     scheme_config.display_scheme();
     model
@@ -51,6 +54,7 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
+// TODO need to implement the evolutionary search
 #[allow(unused)]
 fn run_evolutionary_search(candidates: Vec<UpdateSchemeCandidate>) {
     let mut evolution = EvolutionBuilder::new(candidates.len() as u32, 5, GeneCod::Bin, ())
