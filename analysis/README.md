@@ -6,13 +6,15 @@ This is the analysis program that can analyze a model and provide the user with 
 
 ## Setup
 
-```bash
-export PYTHONPATH=${PYTHONPATH}:$(pwd)
-```
-
 > TODO - requirements for python script
 
 ## Usage
+
+### Update PYTHONPATH
+
+```bash
+export PYTHONPATH=${PYTHONPATH}:$(pwd)
+```
 
 ### Pre-processing
 
