@@ -17,7 +17,7 @@ use evolutionary::prelude::*;
 
 fn main() -> Result<(), Error> {
     // Create a Model instance from the json generated when running a simulation of the on device training
-    let model = Model::from_json("analysis/misc/mcunet-5fps_all.json")?;
+    let model = Model::from_json("analysis/model_jsons/mcunet-5fps_all.json")?;
 
     let mut candidates = Vec::new();
 
