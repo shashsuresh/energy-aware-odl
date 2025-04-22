@@ -23,6 +23,15 @@ impl SparseUpdateConfig {
         }
     }
 
+    /// Create a new sparse update config from a `Vec` of layers and ratios and
+    /// the number of biases to update
+    pub fn new(layer_ratio_pairs: Vec<(usize, ChannelRatio)>, k_bias: usize) -> Self {
+        SparseUpdateConfig {
+            weights: layer_ratio_pairs,
+            bias: k_bias,
+        }
+    }
+
     /// Display the scheme in a reader friendly format
     pub fn display_scheme(&self) {
         print!("Bias of last {} layers\nWeights - ", self.bias);

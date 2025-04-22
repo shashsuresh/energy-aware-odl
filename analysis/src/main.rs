@@ -38,17 +38,37 @@ fn main() -> Result<(), Error> {
     }
     // Create a GreedyGenerator instance
     let mut scheme_gen = GreedyGenerator::new(
-        update_scheme_gen::Constraints::Memory(77),
-        update_scheme_gen::OptimizationParam::Efficiency,
+        update_scheme_gen::Constraints::Memory(66),
+        update_scheme_gen::OptimizationParam::Accuracy,
     );
     // Generate the best update scheme for the given constraints
     let scheme = scheme_gen.generate_schemes(candidates);
 
     // Get the training statistics for the scheme
-    let scheme_config = SparseUpdateConfig::from_scheme(scheme, 22);
+    let scheme_config = SparseUpdateConfig::from_scheme(scheme, 20);
+    println!("Our update strategy:");
     scheme_config.display_scheme();
+
+    println!("Our scheme update costs:");
     model
         .get_sparse_update_statistics(scheme_config, 42)
+        .display_total_stats();
+
+    // MIT's final scheme - used to compare our output with theirs
+    let mit_100kb_vec = vec![
+        (21, ChannelRatio::All),
+        (24, ChannelRatio::All),
+        (27, ChannelRatio::All),
+        (30, ChannelRatio::All),
+        (36, ChannelRatio::OneEighth),
+        (39, ChannelRatio::Quarter),
+    ];
+
+    // Analyze and print this too
+    let mit_100kb = SparseUpdateConfig::new(mit_100kb_vec, 22);
+    println!("MIT scheme update costs:");
+    model
+        .get_sparse_update_statistics(mit_100kb, 42)
         .display_total_stats();
 
     Ok(())
