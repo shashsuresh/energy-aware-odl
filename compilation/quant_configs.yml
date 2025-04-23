@@ -1,0 +1,9 @@
+# We will be using these default configs for now
+# Updating these configs will also update
+# corresponding config consts in the quantization module
+
+q_grad: false
+rounding: 'round'
+conv_w_grad: true
+quantize_grads: false
+train_scales: false
