@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{ChannelRatio, model_representation::layer_descriptor::LayerDescriptor};
+use crate::model_representation::layer_descriptor::LayerDescriptor;
+
+use super::channel_ratio::ChannelRatio;
 
 #[derive(Deserialize, Serialize, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 /// A CNN layer described by an ID and a layer descriptor

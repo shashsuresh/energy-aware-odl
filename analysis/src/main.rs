@@ -1,7 +1,4 @@
-mod model_representation;
-mod scheme_generation;
-mod scheme_representation;
-
+use analysis::{model_representation, scheme_generation, scheme_representation};
 use model_representation::{channel_ratio::ChannelRatio, model::Model};
 use scheme_generation::{
     params_constraints, sparse_update::SparseUpdateSchemeGenerator,
