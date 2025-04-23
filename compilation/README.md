@@ -23,9 +23,9 @@ The repository is split up into two main directories
 ### Set up environment
 
 ```bash
-export QUANT=~/TUDelft/thesis/tiny-training-custom/quantization
+export QUANT=~/energy-aware-odl/compilation/quantization
 export PYTHONPATH=$QUANT:${PYTHONPATH}
-export TVM_HOME=~/TUDelft/thesis/tvm-hack
+export TVM_HOME=~/PATH/tvm-hack # Replace path with the path to your checkout of tvm-hack
 export PYTHONPATH=$TVM_HOME/python:${PYTHONPATH}
 ```
 

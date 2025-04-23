@@ -4,6 +4,7 @@ use crate::{
     model_representation::channel_ratio::ChannelRatio, model_representation::layer::Layer,
 };
 
+/// Represents a potential member of the sparse update config
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct UpdateSchemeCandidate {
     pub id: usize,
@@ -16,6 +17,8 @@ pub struct UpdateSchemeCandidate {
 }
 
 impl UpdateSchemeCandidate {
+    /// Creates a new `UpdateSchemeCandidate` instance from a `Layer` instance,
+    /// the `id` of the layer and a `ChannelRatio`
     pub fn new(layer: &Layer, id: usize, channel_ratio: ChannelRatio) -> Self {
         UpdateSchemeCandidate {
             id,
@@ -30,6 +33,7 @@ impl UpdateSchemeCandidate {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Copy)]
+/// Cost and effect of each variant of a layer, derived by "Contribution Analysis"
 pub struct RatioStats {
     pub delta_acc: isize,
     pub bp_ops: usize,
@@ -37,6 +41,8 @@ pub struct RatioStats {
 }
 
 impl RatioStats {
+    /// Create a new `RadioStats` instance from a `Layer` instance and a `ChannelRatio`
+    /// If ratio is `None`, this means that only bias is updated. 
     pub fn new(layer: &Layer, channel_ratio: Option<ChannelRatio>) -> Self {
         RatioStats {
             delta_acc: layer.layer_info.get_delta_acc(channel_ratio),

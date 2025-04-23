@@ -24,16 +24,12 @@ impl SparseUpdateSchemeGenerator {
 
     /// A method that allows generation of update strategies from a list of all possible layers to choose from
     /// using the greedy algorithm
-    pub fn generate_schemes(
+    pub fn generate_schemes_greedy(
         &mut self,
         all_options: Vec<UpdateSchemeCandidate>,
     ) -> Vec<UpdateSchemeCandidate> {
-        let mut good_solutions = self.eliminate_unreasonable(all_options);
-        good_solutions.sort_by(|x, y| {
-            (self.get_opt_param(y))
-                .partial_cmp(&self.get_opt_param(x))
-                .unwrap()
-        });
+        let good_solutions = self.eliminate_unreasonable(all_options);
+        let good_solutions = self.sort_solutions(good_solutions);
         let mut scheme: Vec<UpdateSchemeCandidate> = Vec::new();
 
         for candidate in good_solutions {
@@ -46,6 +42,25 @@ impl SparseUpdateSchemeGenerator {
             }
         }
         scheme
+    }
+
+    pub fn generate_scheme_dp(
+        &mut self,
+        all_options: Vec<UpdateSchemeCandidate>
+    ) -> Vec<UpdateSchemeCandidate> {
+        let good_solutions = self.eliminate_unreasonable(all_options);
+        let _good_solutions = self.sort_solutions(good_solutions);
+
+        todo!();
+    }
+
+    fn sort_solutions(&self, mut good_solutions: Vec<UpdateSchemeCandidate>) -> Vec<UpdateSchemeCandidate> {
+        good_solutions.sort_by(|x, y| {
+            (self.get_opt_param(y))
+                .partial_cmp(&self.get_opt_param(x))
+                .unwrap()
+        });
+        good_solutions
     }
 
     /// Private method that returns the optimization parameter for the update strategy search, based on how the
