@@ -7,9 +7,13 @@ use super::{
     },
 };
 
+/// All weights are `int8``
 static WEIGHT_BITS: usize = 8;
+// All biases are `int32``
 static BIAS_BITS: usize = 32;
+/// FC not considered in calculations as it is update at all times
 static FC_BITS: usize = 0;
+/// All activation values are `int8`
 static ACTIVATION_BITS: usize = 8;
 
 #[derive(Deserialize, Serialize, Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
