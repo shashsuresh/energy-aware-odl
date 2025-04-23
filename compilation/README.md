@@ -53,4 +53,6 @@ Test folder has a set of tests and test_refs that can be used to test the IR gen
 
 To test:
 
-> python -m unittest discover -s tests -v
+```bash
+python -m unittest discover -s tests -v
+```
