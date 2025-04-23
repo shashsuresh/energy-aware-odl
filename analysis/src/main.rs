@@ -4,14 +4,11 @@ mod scheme_representation;
 
 use model_representation::{channel_ratio::ChannelRatio, model::Model};
 use scheme_generation::{
-    scheme_generators::greedy::GreedyGenerator,
-    update_scheme_candidate, update_scheme_fitness,
-    update_scheme_gen::{self, SchemeGenerator},
+    params_constraints, sparse_update::SparseUpdateSchemeGenerator,
+    update_scheme_candidate::UpdateSchemeCandidate, update_scheme_fitness::UpdateSchemeFitness,
 };
 use scheme_representation::sparse_update_config::SparseUpdateConfig;
 use std::io::Error;
-use update_scheme_candidate::UpdateSchemeCandidate;
-use update_scheme_fitness::UpdateSchemeFitness;
 
 use evolutionary::prelude::*;
 
@@ -37,9 +34,9 @@ fn main() -> Result<(), Error> {
         }
     }
     // Create a GreedyGenerator instance
-    let mut scheme_gen = GreedyGenerator::new(
-        update_scheme_gen::Constraints::Memory(66),
-        update_scheme_gen::OptimizationParam::Accuracy,
+    let mut scheme_gen = SparseUpdateSchemeGenerator::new(
+        params_constraints::Constraints::Memory(66),
+        params_constraints::OptimizationParam::Accuracy,
     );
     // Generate the best update scheme for the given constraints
     let scheme = scheme_gen.generate_schemes(candidates);

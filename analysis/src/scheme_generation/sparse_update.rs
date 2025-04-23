@@ -1,48 +1,30 @@
 use crate::scheme_generation::{
+    params_constraints::{Constraints, OptimizationParam},
     update_scheme_candidate::UpdateSchemeCandidate,
-    update_scheme_gen::{Constraints, OptimizationParam, SchemeGenerator},
 };
 
 /// Structure to represent a greedy update scheme generator
 /// which will use the greedy algorithm to derive an update
 /// scheme, which maximizes the provided `opt_param` while
 /// ensuring the `constraint` provided is met.
-pub struct GreedyGenerator {
+pub struct SparseUpdateSchemeGenerator {
     constraints: Constraints,     // Constraint that the scheme must meet
     opt_param: OptimizationParam, // Parameter the greedy algorithm should try to maximize
 }
-impl GreedyGenerator {
+impl SparseUpdateSchemeGenerator {
     /// Create a new greedy instance
     /// `constraint` must be of the type `Constraints`
     /// `opt_param` must be of the type `OptimizationParam`
     pub fn new(constraints: Constraints, opt_param: OptimizationParam) -> Self {
-        GreedyGenerator {
+        SparseUpdateSchemeGenerator {
             constraints,
             opt_param,
         }
     }
-}
 
-impl SchemeGenerator<UpdateSchemeCandidate> for GreedyGenerator {
-    fn eliminate_unreasonable(
-        &self,
-        all_options: Vec<UpdateSchemeCandidate>,
-    ) -> Vec<UpdateSchemeCandidate> {
-        let good_population: Vec<UpdateSchemeCandidate> = all_options
-            .iter()
-            .filter_map(|candidate| {
-                if candidate.stats.delta_acc <= 0 {
-                    None
-                } else {
-                    Some(candidate.to_owned())
-                }
-            })
-            .to_owned()
-            .collect();
-        good_population
-    }
-
-    fn generate_schemes(
+    /// A method that allows generation of update strategies from a list of all possible layers to choose from
+    /// using the greedy algorithm
+    pub fn generate_schemes(
         &mut self,
         all_options: Vec<UpdateSchemeCandidate>,
     ) -> Vec<UpdateSchemeCandidate> {
@@ -66,6 +48,8 @@ impl SchemeGenerator<UpdateSchemeCandidate> for GreedyGenerator {
         scheme
     }
 
+    /// Private method that returns the optimization parameter for the update strategy search, based on how the
+    /// generator is configured
     fn get_opt_param(&self, instance: &UpdateSchemeCandidate) -> f64 {
         match self.opt_param {
             OptimizationParam::Accuracy => instance.stats.delta_acc as f64, // We can guarantee this as all negative delta acc. candidates have been removed!
@@ -75,6 +59,7 @@ impl SchemeGenerator<UpdateSchemeCandidate> for GreedyGenerator {
         }
     }
 
+    /// Private method that returns the constraint and the cost of the instance that is being evaluated for selection
     fn get_constraint(&self, instance: &UpdateSchemeCandidate) -> (usize, usize) {
         match self.constraints {
             Constraints::Memory(available) => (
@@ -84,5 +69,24 @@ impl SchemeGenerator<UpdateSchemeCandidate> for GreedyGenerator {
             Constraints::MACs(_) => (0, 0),
             Constraints::Efficiency(_) => (0, 0),
         }
+    }
+
+    /// Private method to eliminate all the solutions that have negative or zero delta acc from the loaded "Contribution Analysis" data
+    fn eliminate_unreasonable(
+        &self,
+        all_options: Vec<UpdateSchemeCandidate>,
+    ) -> Vec<UpdateSchemeCandidate> {
+        let good_population: Vec<UpdateSchemeCandidate> = all_options
+            .iter()
+            .filter_map(|candidate| {
+                if candidate.stats.delta_acc <= 0 {
+                    None
+                } else {
+                    Some(candidate.to_owned())
+                }
+            })
+            .to_owned()
+            .collect();
+        good_population
     }
 }
