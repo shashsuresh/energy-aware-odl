@@ -44,6 +44,7 @@ impl SparseUpdateSchemeGenerator {
         scheme
     }
 
+    #[allow(unused)]
     pub fn generate_scheme_dp(
         &mut self,
         all_options: Vec<UpdateSchemeCandidate>,
@@ -54,6 +55,8 @@ impl SparseUpdateSchemeGenerator {
         todo!();
     }
 
+    /// A private method that sorts all the available layers in descending
+    /// order of chosen optimization parameter
     fn sort_solutions(
         &self,
         mut good_solutions: Vec<UpdateSchemeCandidate>,

@@ -1,6 +1,6 @@
-**/target
-**/irs/*
-**/model/*
-**/.pkl*
-**/to_deploy/*
+**/target/
+**/irs/
+**/model/
+**/.pkl
+**/to_deploy/
 **/__pycache__/
