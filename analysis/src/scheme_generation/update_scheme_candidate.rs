@@ -42,7 +42,7 @@ pub struct RatioStats {
 
 impl RatioStats {
     /// Create a new `RadioStats` instance from a `Layer` instance and a `ChannelRatio`
-    /// If ratio is `None`, this means that only bias is updated. 
+    /// If ratio is `None`, this means that only bias is updated.
     pub fn new(layer: &Layer, channel_ratio: Option<ChannelRatio>) -> Self {
         RatioStats {
             delta_acc: layer.layer_info.get_delta_acc(channel_ratio),

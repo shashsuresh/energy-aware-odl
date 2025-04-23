@@ -46,7 +46,7 @@ impl SparseUpdateSchemeGenerator {
 
     pub fn generate_scheme_dp(
         &mut self,
-        all_options: Vec<UpdateSchemeCandidate>
+        all_options: Vec<UpdateSchemeCandidate>,
     ) -> Vec<UpdateSchemeCandidate> {
         let good_solutions = self.eliminate_unreasonable(all_options);
         let _good_solutions = self.sort_solutions(good_solutions);
@@ -54,7 +54,10 @@ impl SparseUpdateSchemeGenerator {
         todo!();
     }
 
-    fn sort_solutions(&self, mut good_solutions: Vec<UpdateSchemeCandidate>) -> Vec<UpdateSchemeCandidate> {
+    fn sort_solutions(
+        &self,
+        mut good_solutions: Vec<UpdateSchemeCandidate>,
+    ) -> Vec<UpdateSchemeCandidate> {
         good_solutions.sort_by(|x, y| {
             (self.get_opt_param(y))
                 .partial_cmp(&self.get_opt_param(x))
