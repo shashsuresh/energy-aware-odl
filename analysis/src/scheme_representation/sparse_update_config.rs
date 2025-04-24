@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::{
     model_representation::channel_ratio::ChannelRatio,
     scheme_generation::update_scheme_candidate::UpdateSchemeCandidate,
@@ -43,5 +45,19 @@ impl SparseUpdateConfig {
             )
         }
         println!();
+    }
+}
+
+impl Display for SparseUpdateConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut tmp = String::new();
+        for layer in &self.weights {
+            tmp += &format!(
+                "Layer: {}, Weight Update Ratio: {}\n",
+                layer.0,
+                layer.1.get_value()
+            );
+        }
+        write!(f, "Bias of last {} layers\n{}", self.bias, tmp)
     }
 }

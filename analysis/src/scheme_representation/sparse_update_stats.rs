@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 /// Represents the energy and computation costs
 /// of a particular sparse update config
 pub struct SparseUpdateStats {
@@ -31,5 +33,17 @@ impl SparseUpdateStats {
             (self.layer_wise_activation.iter().sum::<usize>() as f32 / 1024. / 8.).round(),
             (self.layer_wise_weights.iter().sum::<usize>() as f32 / 1024. / 8.).round()
         );
+    }
+}
+
+impl Display for SparseUpdateStats {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} Additional ops, Activation memory {}kB, Weights memory {}kB",
+            self.layer_wise_ops.iter().sum::<usize>(),
+            (self.layer_wise_activation.iter().sum::<usize>() as f32 / 1024. / 8.).round(),
+            (self.layer_wise_weights.iter().sum::<usize>() as f32 / 1024. / 8.).round()
+        )
     }
 }
