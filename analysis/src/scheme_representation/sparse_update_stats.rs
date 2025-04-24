@@ -21,19 +21,6 @@ impl SparseUpdateStats {
             layer_wise_ops,
         }
     }
-
-    /// Prints total activation memory cost, weights memory cost and operation cost
-    pub fn display_total_stats(&self) {
-        println!(
-            "Total additional ops for update: {}",
-            self.layer_wise_ops.iter().sum::<usize>()
-        );
-        println!(
-            "Total memory cost: activation - {}kB weights - {}kB",
-            (self.layer_wise_activation.iter().sum::<usize>() as f32 / 1024. / 8.).round(),
-            (self.layer_wise_weights.iter().sum::<usize>() as f32 / 1024. / 8.).round()
-        );
-    }
 }
 
 impl Display for SparseUpdateStats {

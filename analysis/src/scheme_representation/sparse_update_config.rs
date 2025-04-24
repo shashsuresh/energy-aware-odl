@@ -33,19 +33,6 @@ impl SparseUpdateConfig {
             bias: k_bias,
         }
     }
-
-    /// Display the scheme in a reader friendly format
-    pub fn display_scheme(&self) {
-        print!("Bias of last {} layers\nWeights - ", self.bias);
-        for layer in &self.weights {
-            print!(
-                "Layer: {}, Weight Update Ratio: {} ",
-                layer.0,
-                layer.1.get_value()
-            )
-        }
-        println!();
-    }
 }
 
 impl Display for SparseUpdateConfig {
