@@ -46,9 +46,21 @@ impl RatioStats {
     pub fn new(layer: &Layer, channel_ratio: Option<ChannelRatio>) -> Self {
         RatioStats {
             delta_acc: layer.layer_info.get_delta_acc(channel_ratio),
-            bp_ops: layer.get_computation_cost(channel_ratio),
-            bp_memory: layer.get_activation_memory(channel_ratio)
-                + layer.get_weight_memory(channel_ratio),
+            bp_ops: if channel_ratio.is_none() {// Only bias computation cost
+                layer.get_computation_cost(channel_ratio)
+            } else {// Only weight computation cost
+                layer.get_computation_cost(channel_ratio) - layer.get_computation_cost(None)
+            },
+            bp_memory: if channel_ratio.is_none() {// Only take bias memory
+                layer.get_activation_memory(channel_ratio)
+                + layer.get_weight_memory(channel_ratio)
+            } else { // Only take weight memory
+                (layer.get_activation_memory(channel_ratio)
+                + layer.get_weight_memory(channel_ratio)) - 
+                (layer.get_activation_memory(None)
+                + layer.get_weight_memory(None))
+            }
+            
         }
     }
 }

@@ -111,7 +111,6 @@ impl Model {
                 activation_memory.push(0);
                 weights_memory.push(0);
                 ops.push(0);
-                println!("{} is not included in any of the calculations", layer.id);
             }
         }
         SparseUpdateStats::new(activation_memory, weights_memory, ops)
