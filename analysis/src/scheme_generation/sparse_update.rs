@@ -1,15 +1,16 @@
+use std::cmp::{max, min};
+
 use crate::scheme_generation::{
     params_constraints::{Constraints, OptimizationParam},
     update_scheme_candidate::UpdateSchemeCandidate,
 };
 
-/// Structure to represent a greedy update scheme generator
-/// which will use the greedy algorithm to derive an update
-/// scheme, which maximizes the provided `opt_param` while
+/// Structure to represent a sparse update scheme generator
+/// which maximizes the provided `opt_param` while
 /// ensuring the `constraint` provided is met.
 pub struct SparseUpdateSchemeGenerator {
     constraints: Constraints,     // Constraint that the scheme must meet
-    opt_param: OptimizationParam, // Parameter the greedy algorithm should try to maximize
+    opt_param: OptimizationParam, // Parameter the chosen algorithm should try to maximize
 }
 impl SparseUpdateSchemeGenerator {
     /// Create a new greedy instance
@@ -31,28 +32,78 @@ impl SparseUpdateSchemeGenerator {
         let good_solutions = self.eliminate_unreasonable(all_options);
         let good_solutions = self.sort_solutions(good_solutions);
         let mut scheme: Vec<UpdateSchemeCandidate> = Vec::new();
-
+        let mut budget = self.get_budget();
         for candidate in good_solutions {
-            if !scheme.iter().any(|to_update| to_update.id == candidate.id) {
-                let constraint_val = self.get_constraint(&candidate);
-                if constraint_val.1 < constraint_val.0 {
-                    self.constraints = Constraints::Memory(constraint_val.0 - constraint_val.1);
-                    scheme.push(candidate.clone());
-                }
+            if !scheme.iter().any(|to_update| to_update.id == candidate.id)
+                && self.get_cost(&candidate) < budget
+            {
+                budget -= self.get_cost(&candidate);
+                scheme.push(candidate.clone());
             }
         }
+        let mut delta_acc = 0;
+        for val in &scheme {
+            delta_acc += val.stats.delta_acc;
+        }
+        println!("Delta Acc {}", delta_acc);
         scheme
     }
 
-    #[allow(unused)]
+    fn dp_fill_scheme(
+        &mut self,
+        budget: usize,
+        options: &Vec<UpdateSchemeCandidate>,
+        current_solution: &mut Vec<UpdateSchemeCandidate>,
+        element_to_pick: usize,
+    ) -> usize {
+        // If we are already at the end of the list or there is no memory budget left, just snap out
+        if element_to_pick == 0 || budget == 0 {
+            return 0;
+        }
+
+        // Extract the cost of updating this particular layer
+        let cost = self.get_cost(&options[element_to_pick]);
+        // New solution, if the currently analyzed layer is added to the solution
+        let mut solution_with = 0;
+
+        // If the new layer can be accommodated
+        if cost <= budget {
+            let contribution = options[element_to_pick].stats.delta_acc;
+            current_solution.push(options[element_to_pick].clone());
+            let options = options
+                .iter()
+                .filter(|option| option.id != options[element_to_pick].id)
+                .cloned()
+                .collect();
+            solution_with = contribution as usize
+                + self.dp_fill_scheme(
+                    budget - cost,
+                    &options,
+                    current_solution,
+                    min(options.len() - 1, element_to_pick - 1),
+                )
+        }
+        // If we can not accommodate the analyzed layer, then we try with the next one
+        let solution_without =
+            self.dp_fill_scheme(budget, options, current_solution, element_to_pick - 1);
+
+        max(solution_with, solution_without)
+    }
+
     pub fn generate_scheme_dp(
         &mut self,
         all_options: Vec<UpdateSchemeCandidate>,
     ) -> Vec<UpdateSchemeCandidate> {
         let good_solutions = self.eliminate_unreasonable(all_options);
-        let _good_solutions = self.sort_solutions(good_solutions);
-
-        todo!();
+        let mut scheme = Vec::new();
+        let tmp = self.dp_fill_scheme(
+            self.get_budget(),
+            &good_solutions,
+            &mut scheme,
+            good_solutions.len() - 1,
+        );
+        println!("Delta Acc {}", tmp);
+        scheme
     }
 
     /// A private method that sorts all the available layers in descending
@@ -80,15 +131,23 @@ impl SparseUpdateSchemeGenerator {
         }
     }
 
-    /// Private method that returns the constraint and the cost of the instance that is being evaluated for selection
-    fn get_constraint(&self, instance: &UpdateSchemeCandidate) -> (usize, usize) {
+    /// Private method that returns the budget available for the scheme searcher to use
+    fn get_budget(&self) -> usize {
         match self.constraints {
-            Constraints::Memory(available) => (
-                available,
-                (instance.stats.bp_memory as f64 / 1024. / 8.0).round() as usize,
-            ),
-            Constraints::MACs(_) => (0, 0),
-            Constraints::Efficiency(_) => (0, 0),
+            Constraints::Memory(available) => available,
+            Constraints::MACs(_) => 0,
+            Constraints::Efficiency(_) => 0,
+        }
+    }
+
+    /// Private method that returns the cost of choosing a layer for update based on the constraint type
+    fn get_cost(&self, instance: &UpdateSchemeCandidate) -> usize {
+        match self.constraints {
+            Constraints::Memory(_) => {
+                (instance.stats.bp_memory as f64 / 1024. / 8.).round() as usize
+            }
+            Constraints::MACs(_) => 0,
+            Constraints::Efficiency(_) => 0,
         }
     }
 
