@@ -57,22 +57,23 @@ impl SparseUpdateSchemeGenerator {
         // Create a table we can easily refer to
         let mut table: HashMap<String, Vec<usize>> = HashMap::new();
         let mut table_index_data = Vec::new();
-        table.insert(0.to_string(), vec![0 as usize; self.get_budget() + 1]);
+        table.insert(0.to_string(), vec![0_usize; self.get_budget() + 1]);
         for option in &available_options {
             if option.ratio == ChannelRatio::All {
                 let key = option.id.to_string() + "_" + &option.ratio.get_value().to_string();
-                table.insert(key, vec![0 as usize; self.get_budget() + 1]);
+                table.insert(key, vec![0_usize; self.get_budget() + 1]);
                 table_index_data.push(option.to_owned());
             }
         }
 
-        for layer_option in 1..=(41) {
+        #[allow(clippy::needless_range_loop)]
+        for layer_option in 1..=41 {
             for memory_used in
                 1..=(table.get(&(layer_option.to_string() + "_1")).unwrap().len() - 1)
             {
                 let exclude =
                     table.get(&((layer_option - 1).to_string() + "_1")).unwrap()[memory_used];
-                let mut include = 0 as usize;
+                let mut include = 0_usize;
 
                 //TODO this is an issue
                 let memory_cost_item = self.get_cost(&table_index_data[layer_option]);
