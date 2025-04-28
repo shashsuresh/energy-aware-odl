@@ -1,8 +1,11 @@
-use std::cmp::{max, min};
+use std::{cmp::max, collections::HashMap};
 
-use crate::scheme_generation::{
-    params_constraints::{Constraints, OptimizationParam},
-    update_scheme_candidate::UpdateSchemeCandidate,
+use crate::{
+    model_representation::channel_ratio::ChannelRatio,
+    scheme_generation::{
+        params_constraints::{Constraints, OptimizationParam},
+        update_scheme_candidate::UpdateSchemeCandidate,
+    },
 };
 
 /// Structure to represent a sparse update scheme generator
@@ -49,61 +52,45 @@ impl SparseUpdateSchemeGenerator {
         scheme
     }
 
-    fn dp_fill_scheme(
-        &mut self,
-        budget: usize,
-        options: &Vec<UpdateSchemeCandidate>,
-        current_solution: &mut Vec<UpdateSchemeCandidate>,
-        element_to_pick: usize,
-    ) -> usize {
-        // If we are already at the end of the list or there is no memory budget left, just snap out
-        if element_to_pick == 0 || budget == 0 {
-            return 0;
+    // WIP function - we have something that makes sense rn
+    pub fn generate_scheme_dp(&mut self, available_options: Vec<UpdateSchemeCandidate>) {
+        // Create a table we can easily refer to
+        let mut table: HashMap<String, Vec<usize>> = HashMap::new();
+        let mut table_index_data = Vec::new();
+        table.insert(0.to_string(), vec![0 as usize; self.get_budget() + 1]);
+        for option in &available_options {
+            if option.ratio == ChannelRatio::All {
+                let key = option.id.to_string() + "_" + &option.ratio.get_value().to_string();
+                table.insert(key, vec![0 as usize; self.get_budget() + 1]);
+                table_index_data.push(option.to_owned());
+            }
         }
 
-        // Extract the cost of updating this particular layer
-        let cost = self.get_cost(&options[element_to_pick]);
-        // New solution, if the currently analyzed layer is added to the solution
-        let mut solution_with = 0;
+        for layer_option in 1..=(41) {
+            for memory_used in
+                1..=(table.get(&(layer_option.to_string() + "_1")).unwrap().len() - 1)
+            {
+                let exclude =
+                    table.get(&((layer_option - 1).to_string() + "_1")).unwrap()[memory_used];
+                let mut include = 0 as usize;
 
-        // If the new layer can be accommodated
-        if cost <= budget {
-            let contribution = options[element_to_pick].stats.delta_acc;
-            current_solution.push(options[element_to_pick].clone());
-            let options = options
-                .iter()
-                .filter(|option| option.id != options[element_to_pick].id)
-                .cloned()
-                .collect();
-            solution_with = contribution as usize
-                + self.dp_fill_scheme(
-                    budget - cost,
-                    &options,
-                    current_solution,
-                    min(options.len() - 1, element_to_pick - 1),
-                )
+                //TODO this is an issue
+                let memory_cost_item = self.get_cost(&table_index_data[layer_option]);
+
+                if memory_cost_item <= memory_used {
+                    //TODO this is another issue
+                    include = self.get_opt_param(&table_index_data[layer_option]) as usize;
+
+                    let available_memory = memory_used - memory_cost_item;
+                    include += table.get(&((layer_option - 1).to_string() + "_1")).unwrap()
+                        [available_memory]
+                }
+                table
+                    .entry((layer_option).to_string() + "_1")
+                    .and_modify(|cols| cols[memory_used] = max(exclude, include));
+            }
         }
-        // If we can not accommodate the analyzed layer, then we try with the next one
-        let solution_without =
-            self.dp_fill_scheme(budget, options, current_solution, element_to_pick - 1);
-
-        max(solution_with, solution_without)
-    }
-
-    pub fn generate_scheme_dp(
-        &mut self,
-        all_options: Vec<UpdateSchemeCandidate>,
-    ) -> Vec<UpdateSchemeCandidate> {
-        let good_solutions = self.eliminate_unreasonable(all_options);
-        let mut scheme = Vec::new();
-        let tmp = self.dp_fill_scheme(
-            self.get_budget(),
-            &good_solutions,
-            &mut scheme,
-            good_solutions.len() - 1,
-        );
-        println!("Delta Acc {}", tmp);
-        scheme
+        println!("{:?}", table.get("41_1").unwrap()[16])
     }
 
     /// A private method that sorts all the available layers in descending
