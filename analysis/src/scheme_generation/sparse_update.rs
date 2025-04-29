@@ -32,11 +32,19 @@ impl SparseUpdateSchemeGenerator {
         &mut self,
         all_options: Vec<UpdateSchemeCandidate>,
     ) -> Vec<UpdateSchemeCandidate> {
+        // Remove all zero / negative values
         let good_solutions = self.eliminate_unreasonable(all_options);
+        // Sort the solutions in descending order of delta accuracy
         let good_solutions = self.sort_solutions(good_solutions);
+        // Placeholder for the result
         let mut scheme: Vec<UpdateSchemeCandidate> = Vec::new();
+        // Total budget
         let mut budget = self.get_budget();
+        // Iterate through the good solutions
         for candidate in good_solutions {
+            // If the cost is lower than the available budget
+            // and this layer is not already in the list of
+            // all solutions - then insert
             if !scheme.iter().any(|to_update| to_update.id == candidate.id)
                 && self.get_cost(&candidate) < budget
             {
@@ -44,11 +52,13 @@ impl SparseUpdateSchemeGenerator {
                 scheme.push(candidate.clone());
             }
         }
+        // A quick delta accuracy calculation
         let mut delta_acc = 0;
         for val in &scheme {
             delta_acc += val.stats.delta_acc;
         }
         println!("Delta Acc {}", delta_acc);
+        // Return scheme
         scheme
     }
 
