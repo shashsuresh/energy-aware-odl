@@ -53,6 +53,9 @@ impl SparseUpdateSchemeGenerator {
     }
 
     // WIP function - we have something that makes sense rn
+    // Think of this
+    // For each layer at each stage evaluate each option and pick the best that fits in
+    // Move this to a separate struct, so that we can run our tests
     pub fn generate_scheme_dp(&mut self, available_options: Vec<UpdateSchemeCandidate>) {
         // Create a table we can easily refer to
         let mut table: HashMap<String, Vec<usize>> = HashMap::new();
@@ -67,7 +70,7 @@ impl SparseUpdateSchemeGenerator {
         }
 
         #[allow(clippy::needless_range_loop)]
-        for layer_option in 1..=41 {
+        for layer_option in 1..=(table.keys().len() - 2) {
             for memory_used in
                 1..=(table.get(&(layer_option.to_string() + "_1")).unwrap().len() - 1)
             {
@@ -75,11 +78,9 @@ impl SparseUpdateSchemeGenerator {
                     table.get(&((layer_option - 1).to_string() + "_1")).unwrap()[memory_used];
                 let mut include = 0_usize;
 
-                //TODO this is an issue
                 let memory_cost_item = self.get_cost(&table_index_data[layer_option]);
 
                 if memory_cost_item <= memory_used {
-                    //TODO this is another issue
                     include = self.get_opt_param(&table_index_data[layer_option]) as usize;
 
                     let available_memory = memory_used - memory_cost_item;
@@ -91,7 +92,7 @@ impl SparseUpdateSchemeGenerator {
                     .and_modify(|cols| cols[memory_used] = max(exclude, include));
             }
         }
-        println!("{:?}", table.get("41_1").unwrap()[16])
+        println!("Max val: {}", table.get("41_1").unwrap()[16])
     }
 
     /// A private method that sorts all the available layers in descending
