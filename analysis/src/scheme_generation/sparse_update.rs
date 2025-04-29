@@ -34,7 +34,7 @@ impl SparseUpdateSchemeGenerator {
     ) -> Vec<UpdateSchemeCandidate> {
         // Remove all zero / negative values
         let good_solutions = self.eliminate_unreasonable(all_options);
-        // Sort the solutions in descending order of delta accuracy
+        // Sort the solutions in descending order of `optimization_param`
         let good_solutions = self.sort_solutions(good_solutions);
         // Placeholder for the result
         let mut scheme: Vec<UpdateSchemeCandidate> = Vec::new();
@@ -52,12 +52,6 @@ impl SparseUpdateSchemeGenerator {
                 scheme.push(candidate.clone());
             }
         }
-        // A quick delta accuracy calculation
-        let mut delta_acc = 0;
-        for val in &scheme {
-            delta_acc += val.stats.delta_acc;
-        }
-        println!("Delta Acc {}", delta_acc);
         // Return scheme
         scheme
     }
