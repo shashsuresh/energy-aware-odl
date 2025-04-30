@@ -17,4 +17,5 @@ pub struct ConvolutionParameters {
     pub quarter_acc_x100: isize, // delta accuracy if a quarter of the total channels are updated
     pub eighth_channels: usize,
     pub eighth_acc_x100: isize, // delta accuracy if an eighth of the total channels are updated
+    pub bias_acc_x100: isize,
 }

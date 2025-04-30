@@ -33,4 +33,8 @@ impl BiasUpdateCandidate {
     pub fn get_last_k(&self) -> usize {
         self.last_k
     }
+
+    pub fn get_delta_acc(&self) -> isize {
+        self._delta_acc_x100
+    }
 }

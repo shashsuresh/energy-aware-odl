@@ -36,7 +36,7 @@ fn main() -> Result<(), Error> {
             if layer_idx_parsed
                 > analysis_config.model.get_last_layer_idx() - analysis_config.last_k_biases
             {
-                bias_delta_acc += tmp_layer.stats.delta_acc
+                bias_delta_acc += parsed_layer.layer_info.get_delta_acc(None)
             }
             candidates.push(tmp_layer);
             let tmp_layer =
@@ -49,6 +49,12 @@ fn main() -> Result<(), Error> {
     }
     // Create a bias candidate
     let bias_candidate = BiasUpdateCandidate::new(analysis_config.last_k_biases, bias_delta_acc);
+
+    println!(
+        "Delta acc by updating bias of last {} layers {}",
+        bias_candidate.get_last_k(),
+        bias_candidate.get_delta_acc() as f64 / 100.
+    );
 
     // Create a GreedyGenerator instance
     let mut scheme_gen = SparseUpdateSchemeGenerator::new(

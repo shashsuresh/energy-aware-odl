@@ -76,6 +76,7 @@ mod test {
                 quarter_acc_x100: 5,
                 eighth_channels: 48,
                 eighth_acc_x100: 0,
+                bias_acc_x100: 1,
             }),
         }
     }

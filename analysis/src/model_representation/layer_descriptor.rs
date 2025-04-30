@@ -189,7 +189,7 @@ impl LayerDescriptor {
                         ChannelRatio::OneEighth => convolution_parameters.eighth_acc_x100,
                     }
                 } else {
-                    0
+                    convolution_parameters.bias_acc_x100
                 }
             }
             _ => 0,
