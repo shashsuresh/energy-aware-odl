@@ -3,6 +3,8 @@
 //! CNN models on MCUs and generating a sparse update strategy to meet the
 //! requirements.
 
+/// Config for running the analysis tool
+pub mod config;
 /// Parsing of json files into CNN Models
 /// and represent these CNN models in a format that can
 /// be used for analysis

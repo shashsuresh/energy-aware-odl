@@ -2,7 +2,9 @@ use std::fmt::Display;
 
 use crate::{
     model_representation::channel_ratio::ChannelRatio,
-    scheme_generation::update_scheme_candidate::UpdateSchemeCandidate,
+    scheme_generation::{
+        bias_update_candidate::BiasUpdateCandidate, update_scheme_candidate::UpdateSchemeCandidate,
+    },
 };
 
 /// Represents a sparse update configuration
@@ -14,14 +16,14 @@ pub struct SparseUpdateConfig {
 impl SparseUpdateConfig {
     /// Creates a new sparse update config from an update scheme (`Vec<UpdateSchemeCandidate>`)
     /// Primarily to switch from an update scheme to something the analysis framework can use
-    pub fn from_scheme(scheme: Vec<UpdateSchemeCandidate>, k_biases: usize) -> Self {
+    pub fn from_scheme(scheme: Vec<UpdateSchemeCandidate>, bias: &BiasUpdateCandidate) -> Self {
         let mut weights = Vec::new();
         for layer in scheme {
             weights.push((layer.id, layer.ratio));
         }
         SparseUpdateConfig {
             weights,
-            bias: k_biases,
+            bias: bias.get_last_k(),
         }
     }
 

@@ -37,6 +37,7 @@ for i in range(1,43):
     mcunet_all['conv'+str(i)]['half_acc_x100'] = int(0)
     mcunet_all['conv'+str(i)]['quarter_acc_x100'] = int(0)
     mcunet_all['conv'+str(i)]['eighth_acc_x100'] = int(0)
+    mcunet_all['conv'+str(i)]['bias_acc_x100'] = int(0)
     for delta_acc in delta_accs_data:
         if str(i-1)+"_all" == delta_acc['id']:
             mcunet_all['conv'+str(i)]['all_acc_x100'] = int(float(delta_acc['delta acc']) * 100)
@@ -44,6 +45,8 @@ for i in range(1,43):
             mcunet_all['conv'+str(i)]['half_acc_x100'] = int(float(delta_acc['delta acc']) * 100)
         elif  str(i-1)+"_quarter" == delta_acc['id']:
             mcunet_all['conv'+str(i)]['quarter_acc_x100'] = int(float(delta_acc['delta acc']) * 100)
+        elif  str(i-1)+"_bias" == delta_acc['id']:
+            mcunet_all['conv'+str(i)]['bias_acc_x100'] = int(float(delta_acc['delta acc']) * 100)
 
 with open("analysis/model_jsons/mcunet-5fps_all.json", 'w') as file:
     json.dump(mcunet_all, file)

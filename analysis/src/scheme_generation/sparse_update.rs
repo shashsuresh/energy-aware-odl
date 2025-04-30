@@ -14,15 +14,17 @@ use crate::{
 pub struct SparseUpdateSchemeGenerator {
     constraints: Constraints,     // Constraint that the scheme must meet
     opt_param: OptimizationParam, // Parameter the chosen algorithm should try to maximize
+    last_k: usize, // The chosen bias update, that schemes need to be generated based on
 }
 impl SparseUpdateSchemeGenerator {
     /// Create a new greedy instance
     /// `constraint` must be of the type `Constraints`
     /// `opt_param` must be of the type `OptimizationParam`
-    pub fn new(constraints: Constraints, opt_param: OptimizationParam) -> Self {
+    pub fn new(constraints: Constraints, opt_param: OptimizationParam, last_k: usize) -> Self {
         SparseUpdateSchemeGenerator {
             constraints,
             opt_param,
+            last_k,
         }
     }
 
@@ -31,6 +33,7 @@ impl SparseUpdateSchemeGenerator {
     pub fn generate_schemes_greedy(
         &mut self,
         all_options: Vec<UpdateSchemeCandidate>,
+        last_layer_idx: usize,
     ) -> Vec<UpdateSchemeCandidate> {
         // Remove all zero / negative values
         let good_solutions = self.eliminate_unreasonable(all_options);
@@ -38,14 +41,16 @@ impl SparseUpdateSchemeGenerator {
         let good_solutions = self.sort_solutions(good_solutions);
         // Placeholder for the result
         let mut scheme: Vec<UpdateSchemeCandidate> = Vec::new();
-        // Total budget
+        // Total available budget
         let mut budget = self.get_budget();
         // Iterate through the good solutions
         for candidate in good_solutions {
             // If the cost is lower than the available budget
             // and this layer is not already in the list of
-            // all solutions - then insert
+            // all solutions and we update its bias too
+            // then insert and update the available budget
             if !scheme.iter().any(|to_update| to_update.id == candidate.id)
+                && candidate.id > last_layer_idx - self.last_k
                 && self.get_cost(&candidate) < budget
             {
                 budget -= self.get_cost(&candidate);

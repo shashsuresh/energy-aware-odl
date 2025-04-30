@@ -21,6 +21,11 @@ impl SparseUpdateStats {
             layer_wise_ops,
         }
     }
+
+    pub fn get_total_memory_usage(&self) -> usize {
+        (self.layer_wise_activation.iter().sum::<usize>() as f32 / 1024. / 8.).round() as usize
+            + (self.layer_wise_weights.iter().sum::<usize>() as f32 / 1024. / 8.).round() as usize
+    }
 }
 
 impl Display for SparseUpdateStats {
@@ -29,8 +34,8 @@ impl Display for SparseUpdateStats {
             f,
             "{} Additional ops, Activation memory {}kB, Weights memory {}kB",
             self.layer_wise_ops.iter().sum::<usize>(),
-            (self.layer_wise_activation.iter().sum::<usize>() as f32 / 1024. / 8.).round(),
-            (self.layer_wise_weights.iter().sum::<usize>() as f32 / 1024. / 8.).round()
+            (self.layer_wise_activation.iter().sum::<usize>() as f32 / 1024. / 8.).round() as usize,
+            (self.layer_wise_weights.iter().sum::<usize>() as f32 / 1024. / 8.).round() as usize
         )
     }
 }
