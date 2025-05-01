@@ -4,3 +4,4 @@
 **/.pkl
 **/to_deploy/
 **/__pycache__/
+analysis/pre-processing/temp.csv

@@ -1,12 +1,9 @@
-use std::{cmp::max, collections::HashMap};
-
-use crate::{
-    model_representation::channel_ratio::ChannelRatio,
-    scheme_generation::{
-        params_constraints::{Constraints, OptimizationParam},
-        update_scheme_candidate::UpdateSchemeCandidate,
-    },
+use crate::scheme_generation::{
+    params_constraints::{Constraints, OptimizationParam},
+    update_scheme_candidate::UpdateSchemeCandidate,
 };
+
+use super::dp_table::DPSearch;
 
 /// Structure to represent a sparse update scheme generator
 /// which maximizes the provided `opt_param` while
@@ -65,43 +62,13 @@ impl SparseUpdateSchemeGenerator {
     // Think of this
     // For each layer at each stage evaluate each option and pick the best that fits in
     // Move this to a separate struct, so that we can run our tests
-    pub fn generate_scheme_dp(&mut self, available_options: Vec<UpdateSchemeCandidate>) {
+    pub fn generate_scheme_dp(
+        &mut self,
+        available_options: Vec<UpdateSchemeCandidate>,
+    ) -> Vec<UpdateSchemeCandidate> {
         // Create a table we can easily refer to
-        let mut table: HashMap<String, Vec<usize>> = HashMap::new();
-        let mut table_index_data = Vec::new();
-        table.insert(0.to_string(), vec![0_usize; self.get_budget() + 1]);
-        for option in &available_options {
-            if option.ratio == ChannelRatio::All {
-                let key = option.id.to_string() + "_" + &option.ratio.get_value().to_string();
-                table.insert(key, vec![0_usize; self.get_budget() + 1]);
-                table_index_data.push(option.to_owned());
-            }
-        }
-
-        #[allow(clippy::needless_range_loop)]
-        for layer_option in 1..=(table.keys().len() - 2) {
-            for memory_used in
-                1..=(table.get(&(layer_option.to_string() + "_1")).unwrap().len() - 1)
-            {
-                let exclude =
-                    table.get(&((layer_option - 1).to_string() + "_1")).unwrap()[memory_used];
-                let mut include = 0_usize;
-
-                let memory_cost_item = self.get_cost(&table_index_data[layer_option]);
-
-                if memory_cost_item <= memory_used {
-                    include = self.get_opt_param(&table_index_data[layer_option]) as usize;
-
-                    let available_memory = memory_used - memory_cost_item;
-                    include += table.get(&((layer_option - 1).to_string() + "_1")).unwrap()
-                        [available_memory]
-                }
-                table
-                    .entry((layer_option).to_string() + "_1")
-                    .and_modify(|cols| cols[memory_used] = max(exclude, include));
-            }
-        }
-        println!("Max val: {}", table.get("41_1").unwrap()[16])
+        let mut dp_searcher = DPSearch::new(self.get_budget() + 1, available_options);
+        dp_searcher.search_optimal(&self)
     }
 
     /// A private method that sorts all the available layers in descending
@@ -118,9 +85,9 @@ impl SparseUpdateSchemeGenerator {
         good_solutions
     }
 
-    /// Private method that returns the optimization parameter for the update strategy search, based on how the
+    /// Method that returns the optimization parameter for the update strategy search, based on how the
     /// generator is configured
-    fn get_opt_param(&self, instance: &UpdateSchemeCandidate) -> f64 {
+    pub fn get_opt_param(&self, instance: &UpdateSchemeCandidate) -> f64 {
         match self.opt_param {
             OptimizationParam::Accuracy => instance.stats.delta_acc as f64, // We can guarantee this as all negative delta acc. candidates have been removed!
             OptimizationParam::Efficiency => {
@@ -129,8 +96,8 @@ impl SparseUpdateSchemeGenerator {
         }
     }
 
-    /// Private method that returns the budget available for the scheme searcher to use
-    fn get_budget(&self) -> usize {
+    /// Returns the budget available for the scheme searcher to use
+    pub fn get_budget(&self) -> usize {
         match self.constraints {
             Constraints::Memory(available) => available,
             Constraints::MACs(_) => 0,
@@ -138,8 +105,8 @@ impl SparseUpdateSchemeGenerator {
         }
     }
 
-    /// Private method that returns the cost of choosing a layer for update based on the constraint type
-    fn get_cost(&self, instance: &UpdateSchemeCandidate) -> usize {
+    /// Method that returns the cost of choosing a layer for update based on the constraint type
+    pub fn get_cost(&self, instance: &UpdateSchemeCandidate) -> usize {
         match self.constraints {
             Constraints::Memory(_) => {
                 (instance.stats.bp_memory as f64 / 1024. / 8.).round() as usize
