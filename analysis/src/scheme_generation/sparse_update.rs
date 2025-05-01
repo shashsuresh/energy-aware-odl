@@ -68,7 +68,7 @@ impl SparseUpdateSchemeGenerator {
     ) -> Vec<UpdateSchemeCandidate> {
         // Create a table we can easily refer to
         let mut dp_searcher = DPSearch::new(self.get_budget() + 1, available_options);
-        dp_searcher.search_optimal(&self)
+        dp_searcher.search_optimal(self)
     }
 
     /// A private method that sorts all the available layers in descending

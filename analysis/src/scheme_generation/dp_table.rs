@@ -35,12 +35,12 @@ impl DPSearch {
             for budget in 1..self.solution_table[layer_idx].len() {
                 let score_without_layer = self.solution_table[layer_idx - 1][budget];
                 let mut score_with_layer = 0.;
-                if layer_idx - 1 >= 21 {
+                if layer_idx > 21 {
                     // We do a -1 to 0 index the layers - as that is how they are stored in the options map
                     if let Some(variant) = (self.mapped_options.get(&(layer_idx - 1)))
                         .unwrap()
                         .iter()
-                        .filter(|variant| scheme_gen.get_cost(&variant) <= budget)
+                        .filter(|variant| scheme_gen.get_cost(variant) <= budget)
                         .max_by(|x, y| {
                             (scheme_gen.get_opt_param(x))
                                 .partial_cmp(&(scheme_gen.get_opt_param(y)))
