@@ -29,51 +29,69 @@ impl DPSearch {
     pub fn search_optimal(
         &mut self,
         scheme_gen: &SparseUpdateSchemeGenerator,
+        last_layer_idx: usize,
     ) -> Vec<UpdateSchemeCandidate> {
         let mut layers_to_train = Vec::new();
-        for layer_idx in 1..self.solution_table.len() {
+        let mut variant_map: HashMap<usize, UpdateSchemeCandidate> = HashMap::new();
+        // Account for empty top row and for 0-1 index conversion
+        for layer_idx in
+            ((last_layer_idx + 1) - scheme_gen.get_last_k() + 1)..self.solution_table.len()
+        {
+            //Leave first column empty as we can't have 0 cost layers
             for budget in 1..self.solution_table[layer_idx].len() {
+                // Used to compare whether adding this layer (if possible) is any good or not
                 let score_without_layer = self.solution_table[layer_idx - 1][budget];
+                // Holds the score of the current layer
                 let mut score_with_layer = 0.;
-                if layer_idx > 21 {
-                    // We do a -1 to 0 index the layers - as that is how they are stored in the options map
-                    if let Some(variant) = (self.mapped_options.get(&(layer_idx - 1)))
-                        .unwrap()
-                        .iter()
-                        .filter(|variant| scheme_gen.get_cost(variant) <= budget)
-                        .max_by(|x, y| {
-                            (scheme_gen.get_opt_param(x))
-                                .partial_cmp(&(scheme_gen.get_opt_param(y)))
-                                .unwrap()
-                        })
-                    {
-                        if (layer_idx == 35 && budget == 63)
-                            || (layer_idx == 34 && budget == 55)
-                            || (layer_idx == 33 && budget == 46)
-                            || (layer_idx == 31 && budget == 33)
-                            || (layer_idx == 29 && budget == 26)
-                            || (layer_idx == 28 && budget == 19)
-                            || (layer_idx == 25 && budget == 13)
-                            || (layer_idx == 24 && budget == 8)
-                            || (layer_idx == 22 && budget == 4)
-                        {
-                            layers_to_train.push(variant.clone());
-                        }
-                        score_with_layer += scheme_gen.get_opt_param(variant);
-                        let available_memory = budget - scheme_gen.get_cost(variant);
-                        score_with_layer += self.solution_table[layer_idx - 1][available_memory]
-                    } else {
-                        score_with_layer += 0.;
-                    }
+                // Keep track of which variant we are inserting
+                let mut variant_tmp = None;
+                // If the given layer is part of the initially created map then
+                // Find the layer's variant that fits in memory and has the maximum score
+                if let Some(variant) = (self.mapped_options.get(&(layer_idx - 1)))
+                    .unwrap()
+                    .iter()
+                    .filter(|variant| scheme_gen.get_cost(variant) <= budget)
+                    .max_by(|x, y| {
+                        (scheme_gen.get_opt_param(x))
+                            .partial_cmp(&(scheme_gen.get_opt_param(y)))
+                            .unwrap()
+                    })
+                {
+                    // The result for this sub problem is solved here
+                    score_with_layer += scheme_gen.get_opt_param(variant);
+                    // We get the previously obtained results, rather than recalculating and update
+                    let available_memory = budget - scheme_gen.get_cost(variant);
+                    score_with_layer += self.solution_table[layer_idx - 1][available_memory];
+                    // We also archive the variant inserted, so that we are able to retrieve it for use later on
+                    variant_tmp = Some(variant.clone());
+                } else {
+                    // If the layer is not inserted, then this component is just left to 0
+                    score_with_layer += 0.;
                 }
-                self.solution_table[layer_idx][budget] = score_with_layer.max(score_without_layer);
+                // If adding the layer to the solution improves performance, then we add it and update our archive hashmap
+                if score_with_layer > score_without_layer {
+                    self.solution_table[layer_idx][budget] = score_with_layer;
+                    variant_map.insert(layer_idx * budget, variant_tmp.unwrap());
+                }
+                // If not, we forward the previous result, as that still remains the most optimal solution to this
+                //sub-problem too
+                else {
+                    self.solution_table[layer_idx][budget] = score_without_layer;
+                }
             }
         }
-        for i in 21..43 {
-            println!("Layer - {}: {:?}", i - 1, self.solution_table[i]);
-        }
-        for layer in &layers_to_train {
-            println!("{:?}", layer);
+        // This is the solution extraction part of the dp_table
+        let mut prev_max =
+            self.solution_table[self.solution_table.len() - 1][self.solution_table[0].len() - 1];
+        let mut mem_budget_tracker = self.solution_table[0].len() - 1;
+        for layer in (1..self.solution_table.len() - 1).rev() {
+            if self.solution_table[layer][mem_budget_tracker] != prev_max {
+                if let Some(layer_variant) = variant_map.get(&((layer + 1) * mem_budget_tracker)) {
+                    layers_to_train.push(layer_variant.clone());
+                    mem_budget_tracker -= scheme_gen.get_cost(layer_variant);
+                    prev_max = self.solution_table[layer][mem_budget_tracker];
+                }
+            }
         }
         layers_to_train
     }

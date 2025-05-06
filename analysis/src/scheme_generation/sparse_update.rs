@@ -65,10 +65,11 @@ impl SparseUpdateSchemeGenerator {
     pub fn generate_scheme_dp(
         &mut self,
         available_options: Vec<UpdateSchemeCandidate>,
+        last_layer_idx: usize,
     ) -> Vec<UpdateSchemeCandidate> {
         // Create a table we can easily refer to
         let mut dp_searcher = DPSearch::new(self.get_budget() + 1, available_options);
-        dp_searcher.search_optimal(self)
+        dp_searcher.search_optimal(self, last_layer_idx)
     }
 
     /// A private method that sorts all the available layers in descending
@@ -109,7 +110,7 @@ impl SparseUpdateSchemeGenerator {
     pub fn get_cost(&self, instance: &UpdateSchemeCandidate) -> usize {
         match self.constraints {
             Constraints::Memory(_) => {
-                (instance.stats.bp_memory as f64 / 1024. / 8.).round() as usize
+                (instance.stats.bp_memory as f64 / 1024. / 8.).ceil() as usize
             }
             Constraints::MACs(_) => 0,
             Constraints::Efficiency(_) => 0,
@@ -133,5 +134,10 @@ impl SparseUpdateSchemeGenerator {
             .to_owned()
             .collect();
         good_population
+    }
+
+    /// Getter function, so that `last_k` remains a private member of the `SparseUpdateSchemeGenerator` struct
+    pub fn get_last_k(&self) -> usize {
+        self.last_k
     }
 }
