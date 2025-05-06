@@ -10,9 +10,11 @@ pub struct DPSearch {
 }
 
 impl DPSearch {
-    /// Create a new DPSearch instance
+    /// Create a new DPSearch instance (a table for storing solutions to sub-problems and a mapping to store variants for each layer)
+    /// One row for each value from 0 to last layer - `(available_options.len() / 3) + 1`
+    /// One column for each value from 0 to `budget+1`
     pub fn new(budget: usize, available_options: Vec<UpdateSchemeCandidate>) -> Self {
-        let solution_table = vec![vec![0.; budget]; (available_options.len() / 3) + 1];
+        let solution_table = vec![vec![0.; budget + 1]; (available_options.len() / 3) + 1];
         let mut mapped_options: HashMap<usize, Vec<UpdateSchemeCandidate>> = HashMap::new();
         for candidate in available_options {
             mapped_options
@@ -34,6 +36,7 @@ impl DPSearch {
         let mut layers_to_train = Vec::new();
         let mut variant_map: HashMap<usize, UpdateSchemeCandidate> = HashMap::new();
         // Account for empty top row and for 0-1 index conversion
+        // Ensure we only pick layers within the specified last_k layers for bias update
         for layer_idx in
             ((last_layer_idx + 1) - scheme_gen.get_last_k() + 1)..self.solution_table.len()
         {

@@ -39,7 +39,7 @@ impl SparseUpdateSchemeGenerator {
         // Placeholder for the result
         let mut scheme: Vec<UpdateSchemeCandidate> = Vec::new();
         // Total available budget
-        let mut budget = self.get_budget();
+        let mut budget = self.get_budget() * 1024;
         // Iterate through the good solutions
         for candidate in good_solutions {
             // If the cost is lower than the available budget
@@ -68,7 +68,7 @@ impl SparseUpdateSchemeGenerator {
         last_layer_idx: usize,
     ) -> Vec<UpdateSchemeCandidate> {
         // Create a table we can easily refer to
-        let mut dp_searcher = DPSearch::new(self.get_budget() + 1, available_options);
+        let mut dp_searcher = DPSearch::new(self.get_budget() * 1024, available_options);
         dp_searcher.search_optimal(self, last_layer_idx)
     }
 
@@ -109,9 +109,7 @@ impl SparseUpdateSchemeGenerator {
     /// Method that returns the cost of choosing a layer for update based on the constraint type
     pub fn get_cost(&self, instance: &UpdateSchemeCandidate) -> usize {
         match self.constraints {
-            Constraints::Memory(_) => {
-                (instance.stats.bp_memory as f64 / 1024. / 8.).ceil() as usize
-            }
+            Constraints::Memory(_) => instance.stats.bp_memory / 8,
             Constraints::MACs(_) => 0,
             Constraints::Efficiency(_) => 0,
         }
