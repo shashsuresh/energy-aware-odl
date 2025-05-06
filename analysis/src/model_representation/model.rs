@@ -5,11 +5,14 @@ use std::{
 
 use serde_json::{Map, Value, from_str, from_value};
 
-use crate::scheme_representation::{
-    sparse_update_config::SparseUpdateConfig, sparse_update_stats::SparseUpdateStats,
+use crate::{
+    scheme_generation::update_scheme_candidate::UpdateSchemeCandidate,
+    scheme_representation::{
+        sparse_update_config::SparseUpdateConfig, sparse_update_stats::SparseUpdateStats,
+    },
 };
 
-use super::{layer::Layer, layer_descriptor::LayerDescriptor};
+use super::{channel_ratio::ChannelRatio, layer::Layer, layer_descriptor::LayerDescriptor};
 
 /// A CNN Model represented as a collection of layers
 pub struct Model {
@@ -114,5 +117,30 @@ impl Model {
             }
         }
         SparseUpdateStats::new(activation_memory, weights_memory, ops)
+    }
+
+    /// Converts layers into candidates for the search
+    ///
+    /// Candidate: `Vec<UpdateSchemeCandidate>`, a collection of all layer variants we can choose from
+    pub fn into_candidates(&self) -> Vec<UpdateSchemeCandidate> {
+        let mut candidates = Vec::new();
+        for parsed_layer in self.layers.clone() {
+            if let Some(layer_idx) = parsed_layer.id.strip_prefix("conv") {
+                let layer_idx_parsed: usize = layer_idx.parse::<usize>().unwrap() - 1;
+                let tmp_layer =
+                    UpdateSchemeCandidate::new(&parsed_layer, layer_idx_parsed, ChannelRatio::All);
+                candidates.push(tmp_layer);
+                let tmp_layer =
+                    UpdateSchemeCandidate::new(&parsed_layer, layer_idx_parsed, ChannelRatio::Half);
+                candidates.push(tmp_layer);
+                let tmp_layer = UpdateSchemeCandidate::new(
+                    &parsed_layer,
+                    layer_idx_parsed,
+                    ChannelRatio::Quarter,
+                );
+                candidates.push(tmp_layer);
+            }
+        }
+        candidates
     }
 }

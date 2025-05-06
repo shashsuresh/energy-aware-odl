@@ -3,7 +3,7 @@ use crate::scheme_generation::{
     update_scheme_candidate::UpdateSchemeCandidate,
 };
 
-use super::dp_table::DPSearch;
+use super::{dp_table::DPSearch, searcher::Searchable};
 
 /// Structure to represent a sparse update scheme generator
 /// which maximizes the provided `opt_param` while
@@ -86,30 +86,10 @@ impl SparseUpdateSchemeGenerator {
         good_solutions
     }
 
-    /// Method that returns the optimization parameter for the update strategy search, based on how the
-    /// generator is configured
-    pub fn get_opt_param(&self, instance: &UpdateSchemeCandidate) -> f64 {
-        match self.opt_param {
-            OptimizationParam::Accuracy => instance.stats.delta_acc as f64, // We can guarantee this as all negative delta acc. candidates have been removed!
-            OptimizationParam::Efficiency => {
-                instance.stats.delta_acc as f64 / instance.stats.bp_ops as f64
-            }
-        }
-    }
-
     /// Returns the budget available for the scheme searcher to use
     pub fn get_budget(&self) -> usize {
         match self.constraints {
             Constraints::Memory(available) => available,
-            Constraints::MACs(_) => 0,
-            Constraints::Efficiency(_) => 0,
-        }
-    }
-
-    /// Method that returns the cost of choosing a layer for update based on the constraint type
-    pub fn get_cost(&self, instance: &UpdateSchemeCandidate) -> usize {
-        match self.constraints {
-            Constraints::Memory(_) => instance.stats.bp_memory / 8,
             Constraints::MACs(_) => 0,
             Constraints::Efficiency(_) => 0,
         }
@@ -137,5 +117,41 @@ impl SparseUpdateSchemeGenerator {
     /// Getter function, so that `last_k` remains a private member of the `SparseUpdateSchemeGenerator` struct
     pub fn get_last_k(&self) -> usize {
         self.last_k
+    }
+}
+
+impl Searchable<UpdateSchemeCandidate> for SparseUpdateSchemeGenerator {
+    /// Method that returns the cost of choosing a layer for update based on the constraint type
+    fn get_cost(&self, instance: &UpdateSchemeCandidate) -> usize {
+        match self.constraints {
+            Constraints::Memory(_) => instance.stats.bp_memory / 8,
+            Constraints::MACs(_) => 0,
+            Constraints::Efficiency(_) => 0,
+        }
+    }
+    /// Method that returns the optimization parameter for the update strategy search, based on how the
+    /// generator is configured
+    fn get_opt_param(&self, instance: &UpdateSchemeCandidate) -> f64 {
+        match self.opt_param {
+            OptimizationParam::Accuracy => instance.stats.delta_acc as f64, // We can guarantee this as all negative delta acc. candidates have been removed!
+            OptimizationParam::Efficiency => {
+                instance.stats.delta_acc as f64 / instance.stats.bp_ops as f64
+            }
+        }
+    }
+
+    /// 2 candidates are duplicates if their ids are same
+    /// We can only have one variant of a layer in the scheme
+    fn is_duplicate(
+        &self,
+        instance_1: &UpdateSchemeCandidate,
+        instance_2: &UpdateSchemeCandidate,
+    ) -> bool {
+        instance_1.id == instance_2.id
+    }
+
+    fn is_allowed(&self, instance: &UpdateSchemeCandidate) -> bool {
+        //TODO - how do we want this 42?
+        instance.id > 42 - self.last_k
     }
 }

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::scheme_generation::update_scheme_candidate::UpdateSchemeCandidate;
 
-use super::sparse_update::SparseUpdateSchemeGenerator;
+use super::{searcher::Searchable, sparse_update::SparseUpdateSchemeGenerator};
 
 pub struct DPSearch {
     pub solution_table: Vec<Vec<f64>>, //This is just a table to store solutions

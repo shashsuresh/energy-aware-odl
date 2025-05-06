@@ -6,17 +6,13 @@ use crate::{
 #[derive(Clone)]
 /// A struct to represent the `last_k_biases` to update part of SparseUpdateConfig
 pub struct BiasUpdateCandidate {
-    last_k: usize,          // Last k biases to update
-    _delta_acc_x100: isize, // Delta accuracy x 100 when updating the last K biases
+    last_k: usize, // Last k biases to update
 }
 
 impl BiasUpdateCandidate {
     /// Create a new BiasUpdateCandidate
-    pub fn new(last_k: usize, delta_acc_x100: isize) -> Self {
-        BiasUpdateCandidate {
-            last_k,
-            _delta_acc_x100: delta_acc_x100,
-        }
+    pub fn new(last_k: usize) -> Self {
+        BiasUpdateCandidate { last_k }
     }
 
     /// Get the memory cost of running this bias update scheme only
@@ -32,9 +28,5 @@ impl BiasUpdateCandidate {
     /// Method to return the private member `last_k` for later use
     pub fn get_last_k(&self) -> usize {
         self.last_k
-    }
-
-    pub fn get_delta_acc(&self) -> isize {
-        self._delta_acc_x100
     }
 }
