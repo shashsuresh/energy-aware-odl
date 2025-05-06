@@ -7,7 +7,7 @@ use analysis::{
 use model_representation::{channel_ratio::ChannelRatio, model::Model};
 use scheme_generation::{
     params_constraints, sparse_update::SparseUpdateSchemeGenerator,
-    update_scheme_candidate::UpdateSchemeCandidate, update_scheme_fitness::UpdateSchemeFitness,
+    update_scheme_candidate::UpdateSchemeCandidate,
 };
 use scheme_representation::sparse_update_config::SparseUpdateConfig;
 use std::io::Error;
