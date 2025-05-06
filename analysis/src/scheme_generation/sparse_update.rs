@@ -3,7 +3,7 @@ use crate::scheme_generation::{
     update_scheme_candidate::UpdateSchemeCandidate,
 };
 
-use super::{dp_table::DPSearch, searcher::Searchable};
+use super::{dp_table::DPSearch, searchable::Searchable};
 
 /// Structure to represent a sparse update scheme generator
 /// which maximizes the provided `opt_param` while
@@ -153,5 +153,9 @@ impl Searchable<UpdateSchemeCandidate> for SparseUpdateSchemeGenerator {
     fn is_allowed(&self, instance: &UpdateSchemeCandidate) -> bool {
         //TODO - how do we want this 42?
         instance.id > 42 - self.last_k
+    }
+
+    fn get_id(&self, instance: &UpdateSchemeCandidate) -> usize {
+        instance.id
     }
 }

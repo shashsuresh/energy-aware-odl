@@ -1,4 +1,4 @@
-use analysis::scheme_generation::{greedy::Greedy, searcher::Searchable};
+use analysis::scheme_generation::{greedy::Greedy, searchable::Searchable};
 
 // We don't really need anything here, so just a blank struct
 pub struct Knapsack {
@@ -24,6 +24,11 @@ impl Searchable<Object> for Knapsack {
 
     fn is_allowed(&self, _instance: &Object) -> bool {
         true // No other conditions
+    }
+
+    // We do no really care about the ID in his case
+    fn get_id(&self, _instance: &Object) -> usize {
+        0
     }
 }
 
