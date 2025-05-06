@@ -12,8 +12,6 @@ use scheme_generation::{
 use scheme_representation::sparse_update_config::SparseUpdateConfig;
 use std::io::Error;
 
-use evolutionary::prelude::*;
-
 fn main() -> Result<(), Error> {
     // Create a Model instance from the json generated when running a simulation of the on device training
     let model = Model::from_json("analysis/model_jsons/mcunet-5fps_all.json")?;
@@ -100,22 +98,4 @@ fn main() -> Result<(), Error> {
     );
 
     Ok(())
-}
-
-// TODO need to implement the evolutionary search
-#[allow(unused)]
-fn run_evolutionary_search(candidates: Vec<UpdateSchemeCandidate>) {
-    let mut evolution = EvolutionBuilder::new(candidates.len() as u32, 5, GeneCod::Bin, ())
-        .with_fitness(UpdateSchemeFitness { candidates })
-        .with_selection(TournamentSelection::default())
-        .with_crossover(NPointsCrossover::default())
-        .with_mutation(BitFlipMutation::default())
-        .with_stop_condition(move |_, iterations, _| iterations >= 1000)
-        .build()
-        .unwrap();
-
-    evolution.run();
-    // After the evolution is done, we can get the best individual and its fitness:
-    let best = evolution.current_best();
-    println!("Best individual: {:?}", best);
 }
