@@ -10,10 +10,6 @@ pub struct UpdateSchemeCandidate {
     pub id: usize,
     pub ratio: ChannelRatio,
     pub stats: RatioStats,
-    // pub half: RatioStats,
-    // pub quarter: RatioStats,
-    // pub eighth: RatioStats,
-    // pub bias: RatioStats,
 }
 
 impl UpdateSchemeCandidate {
@@ -24,10 +20,6 @@ impl UpdateSchemeCandidate {
             id,
             stats: RatioStats::new(layer, Some(channel_ratio)),
             ratio: channel_ratio,
-            // half: RatioStats::new(layer, Some(ChannelRatio::Half)),
-            // quarter: RatioStats::new(layer, Some(ChannelRatio::Quarter)),
-            // eighth: RatioStats::new(layer, Some(ChannelRatio::OneEighth)),
-            // bias: RatioStats::new(layer, None),
         }
     }
 }
