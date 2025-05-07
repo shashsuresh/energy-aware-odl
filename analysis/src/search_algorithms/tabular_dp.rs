@@ -82,8 +82,6 @@ impl<T: Clone + Debug, U: Searchable<T>> TabularDP<T, U> {
         for item in (1..rows).rev() {
             if self.solution_table[item][cost_tracker] != prev_max {
                 let member = if let Some(var_map) = &self.variants_inserted {
-                    println!("Item {}, Cost:{}", item, cost_tracker);
-                    println!("{:?}", var_map);
                     if let Some(var) = var_map.get(&((item + 1), cost_tracker)) {
                         solution.push(var.clone());
                         Some(var.clone())
@@ -160,22 +158,13 @@ impl<T: Clone + Debug, U: Searchable<T>> TabularDP<T, U> {
                     self.solution_table[item][total_cost] = score_with_item;
                     if let Some(ref mut map) = self.variants_inserted {
                         if let Some(selected_variant) = &best_variant {
-                            if let Some(_) =
-                                map.insert((item, total_cost), selected_variant.clone())
-                            {
-                                println!("Duplicate?");
-                            } else {
-                                println!("Unique");
-                            }
+                            map.insert((item, total_cost), selected_variant.clone());
                         }
                     }
                 } else {
                     self.solution_table[item][total_cost] = score_without_item;
                 }
             }
-        }
-        for i in 0..self.solution_table.len() {
-            println!("Item: {} - {:?}", i, self.solution_table[i]);
         }
     }
 

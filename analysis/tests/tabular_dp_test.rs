@@ -119,6 +119,5 @@ fn test_fill_knapsack_with_variants() {
     for item in &results {
         knapsack_value += item.value
     }
-    println!("{:?}", results);
     assert_eq!(knapsack_value, 21.)
 }
