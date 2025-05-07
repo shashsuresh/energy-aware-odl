@@ -34,7 +34,7 @@ impl DPSearch {
         last_layer_idx: usize,
     ) -> Vec<UpdateSchemeCandidate> {
         let mut layers_to_train = Vec::new();
-        let mut variant_map: HashMap<usize, UpdateSchemeCandidate> = HashMap::new();
+        let mut variant_map: HashMap<(usize, usize), UpdateSchemeCandidate> = HashMap::new();
         // Account for empty top row and for 0-1 index conversion
         // Ensure we only pick layers within the specified last_k layers for bias update
         for layer_idx in
@@ -74,7 +74,7 @@ impl DPSearch {
                 // If adding the layer to the solution improves performance, then we add it and update our archive hashmap
                 if score_with_layer > score_without_layer {
                     self.solution_table[layer_idx][budget] = score_with_layer;
-                    variant_map.insert(layer_idx * budget, variant_tmp.unwrap());
+                    variant_map.insert((layer_idx, budget), variant_tmp.unwrap());
                 }
                 // If not, we forward the previous result, as that still remains the most optimal solution to this
                 //sub-problem too
@@ -89,7 +89,7 @@ impl DPSearch {
         let mut mem_budget_tracker = self.solution_table[0].len() - 1;
         for layer in (1..self.solution_table.len() - 1).rev() {
             if self.solution_table[layer][mem_budget_tracker] != prev_max {
-                if let Some(layer_variant) = variant_map.get(&((layer + 1) * mem_budget_tracker)) {
+                if let Some(layer_variant) = variant_map.get(&((layer + 1), mem_budget_tracker)) {
                     layers_to_train.push(layer_variant.clone());
                     mem_budget_tracker -= scheme_gen.get_cost(layer_variant);
                     prev_max = self.solution_table[layer][mem_budget_tracker];

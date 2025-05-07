@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use super::searchable::Searchable;
+use crate::scheme_generation::searchable::Searchable;
 
 /// A greedy search struct
 /// Not implemented as a trait as there is only

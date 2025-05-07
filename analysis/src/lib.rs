@@ -16,3 +16,6 @@ pub mod scheme_generation;
 /// Output handling (displaying and TODO - conversion to other formats)
 /// of generated schemes
 pub mod scheme_representation;
+/// Some generioc search algorithm implementations, used to look for the best update
+/// scheme, given certain constraints and the parameter to maximize
+pub mod search_algorithms;

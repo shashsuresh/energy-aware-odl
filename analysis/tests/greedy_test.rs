@@ -1,4 +1,4 @@
-use analysis::scheme_generation::{greedy::Greedy, searchable::Searchable};
+use analysis::{scheme_generation::searchable::Searchable, search_algorithms::greedy::Greedy};
 
 // We don't really need anything here, so just a blank struct
 pub struct Knapsack {
