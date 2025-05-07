@@ -122,11 +122,7 @@ impl<T: Clone + Debug, U: Searchable<T>> TabularDP<T, U> {
                 let sub_problem_helper = if use_variants {
                     best_variant = self.get_best_variant(caller, total_cost, item);
                     if let Some(var) = &best_variant {
-                        SubProblemHelper::new(
-                            true,
-                            caller.get_cost(&var),
-                            caller.get_opt_param(&var),
-                        )
+                        SubProblemHelper::new(true, caller.get_cost(var), caller.get_opt_param(var))
                     } else {
                         // No variant satisfied, so we will not be including this item in our optimal helper
                         SubProblemHelper::new(false, 0, 0.)
