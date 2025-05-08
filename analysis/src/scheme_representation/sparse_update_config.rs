@@ -29,11 +29,16 @@ impl SparseUpdateConfig {
             ops += layer.stats.bp_ops
         }
         delta_acc_x100 += bias.get_delta_acc();
+        let efficiency = if ops == 0 {
+            bias.get_efficiency() + 0.
+        } else {
+            bias.get_efficiency() + (delta_acc_x100 as f64) / (ops as f64)
+        };
         SparseUpdateConfig {
             weights,
             bias: bias.get_last_k(),
             delta_acc_x100,
-            efficiency: bias.get_efficiency() + (delta_acc_x100 as f64) / (ops as f64),
+            efficiency: efficiency,
         }
     }
 
