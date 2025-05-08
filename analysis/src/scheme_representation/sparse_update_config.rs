@@ -8,9 +8,12 @@ use crate::{
 };
 
 /// Represents a sparse update configuration
+#[derive(Debug)]
 pub struct SparseUpdateConfig {
     pub weights: Vec<(usize, ChannelRatio)>, // Layers id, weight update ratio
     pub bias: usize,                         // last k biases to be updated
+    pub delta_acc_x100: isize,
+    pub efficiency: f64,
 }
 
 impl SparseUpdateConfig {
@@ -18,12 +21,19 @@ impl SparseUpdateConfig {
     /// Primarily to switch from an update scheme to something the analysis framework can use
     pub fn from_scheme(scheme: Vec<UpdateSchemeCandidate>, bias: &BiasUpdateCandidate) -> Self {
         let mut weights = Vec::new();
+        let mut delta_acc_x100 = 0;
+        let mut ops = 0;
         for layer in scheme {
             weights.push((layer.id, layer.ratio));
+            delta_acc_x100 += layer.stats.delta_acc;
+            ops += layer.stats.bp_ops
         }
+        delta_acc_x100 += bias.get_delta_acc();
         SparseUpdateConfig {
             weights,
             bias: bias.get_last_k(),
+            delta_acc_x100,
+            efficiency: bias.get_efficiency() + (delta_acc_x100 as f64) / (ops as f64),
         }
     }
 
@@ -33,6 +43,8 @@ impl SparseUpdateConfig {
         SparseUpdateConfig {
             weights: layer_ratio_pairs,
             bias: k_bias,
+            delta_acc_x100: 0,
+            efficiency: 0.,
         }
     }
 }
