@@ -16,7 +16,11 @@ fn main() -> Result<(), Error> {
     let candidates = model.into_candidates();
 
     let mut best_sparse_update_config = SparseUpdateConfig::new(vec![(0, ChannelRatio::All)], 0);
-
+    let mut best_config = Config {
+        last_k_biases: 0,
+        max_memory: 0,
+        model: Models::MCUnet,
+    };
     //In a loop,
     for i in 1..26 {
         let analysis_config = Config {
@@ -40,16 +44,32 @@ fn main() -> Result<(), Error> {
             bias_candidate.get_last_k(),
         );
         // Generate the best update scheme for the given constraints
-        let scheme = scheme_gen.generate_scheme_dp(
+        let scheme = scheme_gen.generate_scheme_greedy(
             candidates.clone(),
             analysis_config.model.get_last_layer_idx(),
         );
 
         let sparse_update_config = SparseUpdateConfig::from_scheme(scheme, &bias_candidate);
         if sparse_update_config.delta_acc_x100 > best_sparse_update_config.delta_acc_x100 {
-            best_sparse_update_config = sparse_update_config
+            best_sparse_update_config = sparse_update_config;
+            best_config = analysis_config
         }
     }
-    println!("best: {:?}", best_sparse_update_config);
+    println!("best:\n{}", best_sparse_update_config);
+    println!(
+        "delta acc total: {}",
+        best_sparse_update_config.delta_acc_x100
+    );
+    println!(
+        "efficiency score total: {}",
+        best_sparse_update_config.efficiency
+    );
+    println!(
+        "{}",
+        model.get_sparse_update_statistics(
+            best_sparse_update_config,
+            best_config.model.get_last_layer_idx()
+        )
+    );
     Ok(())
 }

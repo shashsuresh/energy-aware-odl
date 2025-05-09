@@ -22,23 +22,18 @@ impl SparseUpdateConfig {
     pub fn from_scheme(scheme: Vec<UpdateSchemeCandidate>, bias: &BiasUpdateCandidate) -> Self {
         let mut weights = Vec::new();
         let mut delta_acc_x100 = 0;
-        let mut ops = 0;
+        let mut efficiency_total = 0.;
         for layer in scheme {
             weights.push((layer.id, layer.ratio));
             delta_acc_x100 += layer.stats.delta_acc;
-            ops += layer.stats.bp_ops
+            efficiency_total += (layer.stats.delta_acc as f64 / 100.) / layer.stats.bp_ops as f64
         }
         delta_acc_x100 += bias.get_delta_acc();
-        let efficiency = if ops == 0 {
-            bias.get_efficiency() + 0.
-        } else {
-            bias.get_efficiency() + (delta_acc_x100 as f64) / (ops as f64)
-        };
         SparseUpdateConfig {
             weights,
             bias: bias.get_last_k(),
-            delta_acc_x100,
-            efficiency: efficiency,
+            delta_acc_x100: delta_acc_x100,
+            efficiency: efficiency_total + bias.get_efficiency(),
         }
     }
 

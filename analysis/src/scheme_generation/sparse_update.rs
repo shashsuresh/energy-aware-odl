@@ -27,7 +27,7 @@ impl SparseUpdateSchemeGenerator {
 
     /// A method that allows generation of update strategies from a list of all possible layers to choose from
     /// using the greedy algorithm
-    pub fn generate_schemes_greedy(
+    pub fn generate_scheme_greedy(
         &mut self,
         all_options: Vec<UpdateSchemeCandidate>,
         last_layer_idx: usize,
@@ -135,7 +135,7 @@ impl Searchable<UpdateSchemeCandidate> for SparseUpdateSchemeGenerator {
         match self.opt_param {
             OptimizationParam::Accuracy => instance.stats.delta_acc as f64, // We can guarantee this as all negative delta acc. candidates have been removed!
             OptimizationParam::Efficiency => {
-                instance.stats.delta_acc as f64 / instance.stats.bp_ops as f64
+                (instance.stats.delta_acc as f64 / 100.) / instance.stats.bp_ops as f64
             }
         }
     }
