@@ -1,6 +1,9 @@
-use crate::scheme_generation::{
-    params_constraints::{Constraints, OptimizationParam},
-    update_scheme_candidate::UpdateSchemeCandidate,
+use crate::{
+    scheme_generation::{
+        params_constraints::{Constraints, OptimizationParam},
+        update_scheme_candidate::UpdateSchemeCandidate,
+    },
+    search_algorithms::greedy::Greedy,
 };
 
 use super::{dp_table::DPSearch, searchable::Searchable};
@@ -33,25 +36,13 @@ impl SparseUpdateSchemeGenerator {
         let good_solutions = self.eliminate_unreasonable(all_options);
         // Sort the solutions in descending order of `optimization_param`
         let good_solutions = self.sort_solutions(good_solutions);
-        // Placeholder for the result
-        let mut scheme: Vec<UpdateSchemeCandidate> = Vec::new();
-        // Total available budget
-        let mut budget = self.get_budget() * 1024;
-        // Iterate through the good solutions
-        for candidate in good_solutions {
-            // If the cost is lower than the available budget
-            // and this layer is not already in the list of
-            // all solutions and we update its bias too
-            // then insert and update the available budget
-            if !scheme.iter().any(|to_update| to_update.id == candidate.id)
-                && self.get_cost(&candidate) < budget
-            {
-                budget -= self.get_cost(&candidate);
-                scheme.push(candidate.clone());
-            }
-        }
-        // Return scheme
-        scheme
+
+        // Create a search instance
+        let greedy_searcher: Greedy<UpdateSchemeCandidate, SparseUpdateSchemeGenerator> =
+            Greedy::new(self.get_budget() * 1024);
+
+        // Return the scheme that maximize the provided constraint
+        greedy_searcher.search(good_solutions, self)
     }
 
     // WIP function - we have something that makes sense rn
