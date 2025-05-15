@@ -1,9 +1,12 @@
-use crate::scheme_generation::{
-    params_constraints::{Constraints, OptimizationParam},
-    update_scheme_candidate::UpdateSchemeCandidate,
+use crate::{
+    scheme_generation::{
+        params_constraints::{Constraints, OptimizationParam},
+        update_scheme_candidate::UpdateSchemeCandidate,
+    },
+    search_algorithms::{greedy::Greedy, tabular_dp::TabularDP},
 };
 
-use super::{dp_table::DPSearch, searchable::Searchable};
+use super::searchable::Searchable;
 
 /// Structure to represent a sparse update scheme generator
 /// which maximizes the provided `opt_param` while
@@ -11,51 +14,35 @@ use super::{dp_table::DPSearch, searchable::Searchable};
 pub struct SparseUpdateSchemeGenerator {
     constraints: Constraints,     // Constraint that the scheme must meet
     opt_param: OptimizationParam, // Parameter the chosen algorithm should try to maximize
-    last_k: usize, // The chosen bias update, that schemes need to be generated based on
 }
 impl SparseUpdateSchemeGenerator {
     /// Create a new greedy instance
     /// `constraint` must be of the type `Constraints`
     /// `opt_param` must be of the type `OptimizationParam`
-    pub fn new(constraints: Constraints, opt_param: OptimizationParam, last_k: usize) -> Self {
+    pub fn new(constraints: Constraints, opt_param: OptimizationParam) -> Self {
         SparseUpdateSchemeGenerator {
             constraints,
             opt_param,
-            last_k,
         }
     }
 
     /// A method that allows generation of update strategies from a list of all possible layers to choose from
     /// using the greedy algorithm
-    pub fn generate_schemes_greedy(
+    pub fn generate_scheme_greedy(
         &mut self,
         all_options: Vec<UpdateSchemeCandidate>,
-        last_layer_idx: usize,
     ) -> Vec<UpdateSchemeCandidate> {
         // Remove all zero / negative values
         let good_solutions = self.eliminate_unreasonable(all_options);
         // Sort the solutions in descending order of `optimization_param`
         let good_solutions = self.sort_solutions(good_solutions);
-        // Placeholder for the result
-        let mut scheme: Vec<UpdateSchemeCandidate> = Vec::new();
-        // Total available budget
-        let mut budget = self.get_budget() * 1024;
-        // Iterate through the good solutions
-        for candidate in good_solutions {
-            // If the cost is lower than the available budget
-            // and this layer is not already in the list of
-            // all solutions and we update its bias too
-            // then insert and update the available budget
-            if !scheme.iter().any(|to_update| to_update.id == candidate.id)
-                && candidate.id > last_layer_idx - self.last_k
-                && self.get_cost(&candidate) < budget
-            {
-                budget -= self.get_cost(&candidate);
-                scheme.push(candidate.clone());
-            }
-        }
-        // Return scheme
-        scheme
+
+        // Create a search instance
+        let greedy_searcher: Greedy<UpdateSchemeCandidate, SparseUpdateSchemeGenerator> =
+            Greedy::new(self.get_budget() * 1024);
+
+        // Return the scheme that maximize the provided constraint
+        greedy_searcher.search(good_solutions, self)
     }
 
     // WIP function - we have something that makes sense rn
@@ -65,11 +52,12 @@ impl SparseUpdateSchemeGenerator {
     pub fn generate_scheme_dp(
         &mut self,
         available_options: Vec<UpdateSchemeCandidate>,
-        last_layer_idx: usize,
     ) -> Vec<UpdateSchemeCandidate> {
         // Create a table we can easily refer to
-        let mut dp_searcher = DPSearch::new(self.get_budget() * 1024, available_options);
-        dp_searcher.search_optimal(self, last_layer_idx)
+        let mut dp_searcher =
+            TabularDP::new_with_variants(self.get_budget() * 1024, available_options, 4, self);
+        // Search
+        dp_searcher.search(self)
     }
 
     /// A private method that sorts all the available layers in descending
@@ -113,11 +101,6 @@ impl SparseUpdateSchemeGenerator {
             .collect();
         good_population
     }
-
-    /// Getter function, so that `last_k` remains a private member of the `SparseUpdateSchemeGenerator` struct
-    pub fn get_last_k(&self) -> usize {
-        self.last_k
-    }
 }
 
 impl Searchable<UpdateSchemeCandidate> for SparseUpdateSchemeGenerator {
@@ -150,9 +133,8 @@ impl Searchable<UpdateSchemeCandidate> for SparseUpdateSchemeGenerator {
         instance_1.id == instance_2.id
     }
 
-    fn is_allowed(&self, instance: &UpdateSchemeCandidate) -> bool {
-        //TODO - how do we want this 42?
-        instance.id > 42 - self.last_k
+    fn is_allowed(&self, _instance: &UpdateSchemeCandidate) -> bool {
+        true
     }
 
     fn get_id(&self, instance: &UpdateSchemeCandidate) -> usize {

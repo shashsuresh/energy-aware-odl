@@ -8,17 +8,17 @@ use crate::{
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct UpdateSchemeCandidate {
     pub id: usize,
-    pub ratio: ChannelRatio,
+    pub ratio: Option<ChannelRatio>,
     pub stats: RatioStats,
 }
 
 impl UpdateSchemeCandidate {
     /// Creates a new `UpdateSchemeCandidate` instance from a `Layer` instance,
     /// the `id` of the layer and a `ChannelRatio`
-    pub fn new(layer: &Layer, id: usize, channel_ratio: ChannelRatio) -> Self {
+    pub fn new(layer: &Layer, id: usize, channel_ratio: Option<ChannelRatio>) -> Self {
         UpdateSchemeCandidate {
             id,
-            stats: RatioStats::new(layer, Some(channel_ratio)),
+            stats: RatioStats::new(layer, channel_ratio),
             ratio: channel_ratio,
         }
     }
@@ -34,26 +34,15 @@ pub struct RatioStats {
 
 impl RatioStats {
     /// Create a new `RadioStats` instance from a `Layer` instance and a `ChannelRatio`
-    /// If ratio is `None`, this means that only bias is updated.
+    /// If `channel_ratio` is `None`, this means that only bias is updated.
+    ///
+    /// **As a rule - if the weights of a layer is updated, then the bias is updated**
     pub fn new(layer: &Layer, channel_ratio: Option<ChannelRatio>) -> Self {
         RatioStats {
             delta_acc: layer.layer_info.get_delta_acc(channel_ratio),
-            bp_ops: if channel_ratio.is_none() {
-                // Only bias computation cost
-                layer.get_computation_cost(channel_ratio)
-            } else {
-                // Only weight computation cost
-                layer.get_computation_cost(channel_ratio) - layer.get_computation_cost(None)
-            },
-            bp_memory: if channel_ratio.is_none() {
-                // Only take bias memory
-                layer.get_activation_memory(channel_ratio) + layer.get_weight_memory(channel_ratio)
-            } else {
-                // Only take weight memory
-                (layer.get_activation_memory(channel_ratio)
-                    + layer.get_weight_memory(channel_ratio))
-                    - (layer.get_activation_memory(None) + layer.get_weight_memory(None))
-            },
+            bp_ops: layer.get_computation_cost(channel_ratio),
+            bp_memory: layer.get_activation_memory(channel_ratio)
+                + layer.get_weight_memory(channel_ratio),
         }
     }
 }

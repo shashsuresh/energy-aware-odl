@@ -182,11 +182,14 @@ impl LayerDescriptor {
             | LayerDescriptor::PointwiseConv(convolution_parameters)
             | LayerDescriptor::DepthwiseConv(convolution_parameters) => {
                 if let Some(divider) = ratio_divider {
+                    let bias_acc = convolution_parameters.bias_acc_x100;
                     match divider {
-                        ChannelRatio::All => convolution_parameters.all_acc_x100,
-                        ChannelRatio::Half => convolution_parameters.half_acc_x100,
-                        ChannelRatio::Quarter => convolution_parameters.quarter_acc_x100,
-                        ChannelRatio::OneEighth => convolution_parameters.eighth_acc_x100,
+                        ChannelRatio::All => convolution_parameters.all_acc_x100 + bias_acc,
+                        ChannelRatio::Half => convolution_parameters.half_acc_x100 + bias_acc,
+                        ChannelRatio::Quarter => convolution_parameters.quarter_acc_x100 + bias_acc,
+                        ChannelRatio::OneEighth => {
+                            convolution_parameters.eighth_acc_x100 + bias_acc
+                        }
                     }
                 } else {
                     convolution_parameters.bias_acc_x100

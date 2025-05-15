@@ -71,7 +71,7 @@ fn test_basic_knapsack() {
             id: "C".to_string(),
         },
     ];
-    let solution = searcher.search(test_data, knapsack_to_fill);
+    let solution = searcher.search(test_data, &knapsack_to_fill);
     let mut knapsack_value = 0;
     for item in solution {
         knapsack_value += item.value
@@ -112,7 +112,7 @@ fn test_basic_knapsack_no_duplicates() {
         allow_duplicates: false,
     };
     let searcher: Greedy<Object, Knapsack> = Greedy::new(25);
-    let solution = searcher.search(test_data, knapsack_to_fill);
+    let solution = searcher.search(test_data, &knapsack_to_fill);
     let mut knapsack_value = 0;
     for item in solution {
         knapsack_value += item.value

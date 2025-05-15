@@ -25,7 +25,7 @@ impl<T, U: Searchable<T>> Greedy<T, U> {
     }
 
     /// Run the greedy search algorithm
-    pub fn search(&self, good_candidates_sorted: Vec<T>, scheme_gen: U) -> Vec<T> {
+    pub fn search(&self, good_candidates_sorted: Vec<T>, scheme_gen: &U) -> Vec<T> {
         let mut available_budget = self.budget;
         let mut result = Vec::new();
 
