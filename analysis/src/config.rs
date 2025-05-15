@@ -1,6 +1,5 @@
 // Just some configs for the runner
 pub struct Config {
-    pub last_k_biases: usize,
     pub max_memory: usize,
     pub model: Models,
 }

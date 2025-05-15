@@ -6,6 +6,7 @@ use std::{
 use serde_json::{Map, Value, from_str, from_value};
 
 use crate::{
+    config::Config,
     scheme_generation::update_scheme_candidate::UpdateSchemeCandidate,
     scheme_representation::{
         sparse_update_config::SparseUpdateConfig, sparse_update_stats::SparseUpdateStats,
@@ -84,7 +85,7 @@ impl Model {
     pub fn get_sparse_update_statistics(
         &self,
         config: SparseUpdateConfig,
-        layer_iter_max: usize,
+        analysis_config: &Config,
     ) -> SparseUpdateStats {
         // Op tracker
         let mut ops = Vec::new();
@@ -94,17 +95,23 @@ impl Model {
         for layer in &self.layers {
             if let Some(layer_id) = layer.id.strip_prefix("conv") {
                 let layer_id_parsed: usize = layer_id.parse::<usize>().unwrap() - 1;
-
-                //First look for the layer in the config, if yes incude weights and biases
                 if let Some(pair) = config.weights.iter().find(|pair| pair.0 == layer_id_parsed) {
-                    activation_memory.push(layer.get_activation_memory(Some(pair.1)));
-                    weights_memory.push(layer.get_weight_memory(Some(pair.1)));
-                    ops.push(layer.get_computation_cost(Some(pair.1)));
-                } else if (layer_iter_max - config.bias..layer_iter_max).contains(&layer_id_parsed)
-                {
-                    activation_memory.push(layer.get_activation_memory(None));
-                    weights_memory.push(layer.get_weight_memory(None));
-                    ops.push(layer.get_computation_cost(None));
+                    activation_memory.push(layer.get_activation_memory(pair.1));
+                    weights_memory.push(layer.get_weight_memory(pair.1));
+                    ops.push(layer.get_computation_cost(pair.1));
+                } else if let Some(k_bias) = config.bias {
+                    if (analysis_config.model.get_last_layer_idx() - k_bias
+                        ..analysis_config.model.get_last_layer_idx())
+                        .contains(&layer_id_parsed)
+                    {
+                        activation_memory.push(layer.get_activation_memory(None));
+                        weights_memory.push(layer.get_weight_memory(None));
+                        ops.push(layer.get_computation_cost(None));
+                    } else {
+                        activation_memory.push(0);
+                        weights_memory.push(0);
+                        ops.push(0);
+                    }
                 } else {
                     activation_memory.push(0);
                     weights_memory.push(0);
@@ -127,17 +134,25 @@ impl Model {
         for parsed_layer in self.layers.clone() {
             if let Some(layer_idx) = parsed_layer.id.strip_prefix("conv") {
                 let layer_idx_parsed: usize = layer_idx.parse::<usize>().unwrap() - 1;
-                let tmp_layer =
-                    UpdateSchemeCandidate::new(&parsed_layer, layer_idx_parsed, ChannelRatio::All);
-                candidates.push(tmp_layer);
-                let tmp_layer =
-                    UpdateSchemeCandidate::new(&parsed_layer, layer_idx_parsed, ChannelRatio::Half);
+                let tmp_layer = UpdateSchemeCandidate::new(
+                    &parsed_layer,
+                    layer_idx_parsed,
+                    Some(ChannelRatio::All),
+                );
                 candidates.push(tmp_layer);
                 let tmp_layer = UpdateSchemeCandidate::new(
                     &parsed_layer,
                     layer_idx_parsed,
-                    ChannelRatio::Quarter,
+                    Some(ChannelRatio::Half),
                 );
+                candidates.push(tmp_layer);
+                let tmp_layer = UpdateSchemeCandidate::new(
+                    &parsed_layer,
+                    layer_idx_parsed,
+                    Some(ChannelRatio::Quarter),
+                );
+                candidates.push(tmp_layer);
+                let tmp_layer = UpdateSchemeCandidate::new(&parsed_layer, layer_idx_parsed, None);
                 candidates.push(tmp_layer);
             }
         }
