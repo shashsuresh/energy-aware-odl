@@ -57,7 +57,7 @@ impl SparseUpdateSchemeGenerator {
         let mut dp_searcher =
             TabularDP::new_with_variants(self.get_budget() * 1024, available_options, 4, self);
         // Search
-        dp_searcher.search(&self)
+        dp_searcher.search(self)
     }
 
     /// A private method that sorts all the available layers in descending
