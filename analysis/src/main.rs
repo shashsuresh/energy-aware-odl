@@ -29,7 +29,7 @@ fn main() -> Result<(), Error> {
         params_constraints::OptimizationParam::Accuracy,
     );
     // Generate the best update scheme for the given constraints
-    let scheme = scheme_gen.generate_schemes_greedy(candidates);
+    let scheme = scheme_gen.generate_scheme_dp(candidates);
 
     // Get the training statistics for the scheme
     let scheme_config = SparseUpdateConfig::from_scheme(scheme);

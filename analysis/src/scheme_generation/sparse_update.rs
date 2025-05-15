@@ -3,10 +3,10 @@ use crate::{
         params_constraints::{Constraints, OptimizationParam},
         update_scheme_candidate::UpdateSchemeCandidate,
     },
-    search_algorithms::greedy::Greedy,
+    search_algorithms::{greedy::Greedy, tabular_dp::TabularDP},
 };
 
-use super::{dp_table::DPSearch, searchable::Searchable};
+use super::searchable::Searchable;
 
 /// Structure to represent a sparse update scheme generator
 /// which maximizes the provided `opt_param` while
@@ -28,7 +28,7 @@ impl SparseUpdateSchemeGenerator {
 
     /// A method that allows generation of update strategies from a list of all possible layers to choose from
     /// using the greedy algorithm
-    pub fn generate_schemes_greedy(
+    pub fn generate_scheme_greedy(
         &mut self,
         all_options: Vec<UpdateSchemeCandidate>,
     ) -> Vec<UpdateSchemeCandidate> {
@@ -54,8 +54,10 @@ impl SparseUpdateSchemeGenerator {
         available_options: Vec<UpdateSchemeCandidate>,
     ) -> Vec<UpdateSchemeCandidate> {
         // Create a table we can easily refer to
-        let mut dp_searcher = DPSearch::new(self.get_budget() * 1024, available_options);
-        dp_searcher.search_optimal(self)
+        let mut dp_searcher =
+            TabularDP::new_with_variants(self.get_budget() * 1024, available_options, 4, self);
+        // Search
+        dp_searcher.search(&self)
     }
 
     /// A private method that sorts all the available layers in descending
