@@ -19,7 +19,7 @@ impl BiasUpdateCandidate {
         for layer in &model.layers {
             if let Some(layer_idx) = layer.id.strip_prefix("conv") {
                 if let Ok(id) = layer_idx.parse::<usize>() {
-                    if id - 1 >= config.model.get_last_layer_idx() - config.last_k_biases {
+                    if id > config.model.get_last_layer_idx() - config.last_k_biases {
                         delta_acc_x100 += layer.layer_info.get_delta_acc(None);
                         ops += layer.get_computation_cost(None);
                     }

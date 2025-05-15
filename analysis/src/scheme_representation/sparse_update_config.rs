@@ -32,7 +32,7 @@ impl SparseUpdateConfig {
         SparseUpdateConfig {
             weights,
             bias: bias.get_last_k(),
-            delta_acc_x100: delta_acc_x100,
+            delta_acc_x100,
             efficiency: efficiency_total + bias.get_efficiency(),
         }
     }
