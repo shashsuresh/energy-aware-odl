@@ -20,9 +20,6 @@ fn main() -> Result<(), Error> {
         model: Models::MCUnet,
     };
 
-    // Create a bias candidate
-    //let bias_candidate = BiasUpdateCandidate::new(22);
-
     // Create a GreedyGenerator instance
     let mut scheme_gen = SparseUpdateSchemeGenerator::new(
         params_constraints::Constraints::Memory(analysis_config.max_memory),

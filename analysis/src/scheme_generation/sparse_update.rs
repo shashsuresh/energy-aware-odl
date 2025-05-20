@@ -104,7 +104,7 @@ impl SparseUpdateSchemeGenerator {
 }
 
 impl Searchable<UpdateSchemeCandidate> for SparseUpdateSchemeGenerator {
-    /// Method that returns the cost of choosing a layer for update based on the constraint type
+    // Can be Memory, MACs (TODO) or Efficiency score (TODO)
     fn get_cost(&self, instance: &UpdateSchemeCandidate) -> usize {
         match self.constraints {
             Constraints::Memory(_) => instance.stats.bp_memory / 8,
@@ -112,8 +112,8 @@ impl Searchable<UpdateSchemeCandidate> for SparseUpdateSchemeGenerator {
             Constraints::Efficiency(_) => 0,
         }
     }
-    /// Method that returns the optimization parameter for the update strategy search, based on how the
-    /// generator is configured
+
+    // Maximize Accuracy or Efficiency
     fn get_opt_param(&self, instance: &UpdateSchemeCandidate) -> f64 {
         match self.opt_param {
             OptimizationParam::Accuracy => instance.stats.delta_acc as f64, // We can guarantee this as all negative delta acc. candidates have been removed!
@@ -123,8 +123,8 @@ impl Searchable<UpdateSchemeCandidate> for SparseUpdateSchemeGenerator {
         }
     }
 
-    /// 2 candidates are duplicates if their ids are same
-    /// We can only have one variant of a layer in the scheme
+    // 2 candidates are duplicates if their ids are same
+    // We can only have one variant of a layer in the scheme
     fn is_duplicate(
         &self,
         instance_1: &UpdateSchemeCandidate,
@@ -133,10 +133,12 @@ impl Searchable<UpdateSchemeCandidate> for SparseUpdateSchemeGenerator {
         instance_1.id == instance_2.id
     }
 
+    // At present we do not have any additional conditions
     fn is_allowed(&self, _instance: &UpdateSchemeCandidate) -> bool {
         true
     }
 
+    // Return the instance ID
     fn get_id(&self, instance: &UpdateSchemeCandidate) -> usize {
         instance.id
     }
